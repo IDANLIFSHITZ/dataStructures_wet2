@@ -128,6 +128,54 @@ wet24_to_publish/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\wet24_to_publish.dir\build.make CMakeFiles/wet24_to_publish.dir/build
 .PHONY : wet24_to_publish/fast
 
+Player.obj: Player.cpp.obj
+.PHONY : Player.obj
+
+# target to build an object file
+Player.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\wet24_to_publish.dir\build.make CMakeFiles/wet24_to_publish.dir/Player.cpp.obj
+.PHONY : Player.cpp.obj
+
+Player.i: Player.cpp.i
+.PHONY : Player.i
+
+# target to preprocess a source file
+Player.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\wet24_to_publish.dir\build.make CMakeFiles/wet24_to_publish.dir/Player.cpp.i
+.PHONY : Player.cpp.i
+
+Player.s: Player.cpp.s
+.PHONY : Player.s
+
+# target to generate assembly for a file
+Player.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\wet24_to_publish.dir\build.make CMakeFiles/wet24_to_publish.dir/Player.cpp.s
+.PHONY : Player.cpp.s
+
+Team.obj: Team.cpp.obj
+.PHONY : Team.obj
+
+# target to build an object file
+Team.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\wet24_to_publish.dir\build.make CMakeFiles/wet24_to_publish.dir/Team.cpp.obj
+.PHONY : Team.cpp.obj
+
+Team.i: Team.cpp.i
+.PHONY : Team.i
+
+# target to preprocess a source file
+Team.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\wet24_to_publish.dir\build.make CMakeFiles/wet24_to_publish.dir/Team.cpp.i
+.PHONY : Team.cpp.i
+
+Team.s: Team.cpp.s
+.PHONY : Team.s
+
+# target to generate assembly for a file
+Team.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\wet24_to_publish.dir\build.make CMakeFiles/wet24_to_publish.dir/Team.cpp.s
+.PHONY : Team.cpp.s
+
 hashTacble.obj: hashTacble.cpp.obj
 .PHONY : hashTacble.obj
 
@@ -185,6 +233,12 @@ help:
 	@echo ... edit_cache
 	@echo ... rebuild_cache
 	@echo ... wet24_to_publish
+	@echo ... Player.obj
+	@echo ... Player.i
+	@echo ... Player.s
+	@echo ... Team.obj
+	@echo ... Team.i
+	@echo ... Team.s
 	@echo ... hashTacble.obj
 	@echo ... hashTacble.i
 	@echo ... hashTacble.s

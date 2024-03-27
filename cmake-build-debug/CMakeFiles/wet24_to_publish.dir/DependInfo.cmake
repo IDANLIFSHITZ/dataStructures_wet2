@@ -8,6 +8,8 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "C:/Users/yuval/CLionProjects/dataStructures_wet2/Player.cpp" "CMakeFiles/wet24_to_publish.dir/Player.cpp.obj" "gcc" "CMakeFiles/wet24_to_publish.dir/Player.cpp.obj.d"
+  "C:/Users/yuval/CLionProjects/dataStructures_wet2/Team.cpp" "CMakeFiles/wet24_to_publish.dir/Team.cpp.obj" "gcc" "CMakeFiles/wet24_to_publish.dir/Team.cpp.obj.d"
   "C:/Users/yuval/CLionProjects/dataStructures_wet2/hashTacble.cpp" "CMakeFiles/wet24_to_publish.dir/hashTacble.cpp.obj" "gcc" "CMakeFiles/wet24_to_publish.dir/hashTacble.cpp.obj.d"
   "C:/Users/yuval/CLionProjects/dataStructures_wet2/main.cpp" "CMakeFiles/wet24_to_publish.dir/main.cpp.obj" "gcc" "CMakeFiles/wet24_to_publish.dir/main.cpp.obj.d"
   )

@@ -82,6 +82,21 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="C:/Users/yuval/CLionProjects/dataStructures_wet2/AVL.h">
+			<Option target="wet24_to_publish"/>
+		</Unit>
+		<Unit filename="C:/Users/yuval/CLionProjects/dataStructures_wet2/Player.cpp">
+			<Option target="wet24_to_publish"/>
+		</Unit>
+		<Unit filename="C:/Users/yuval/CLionProjects/dataStructures_wet2/Player.h">
+			<Option target="wet24_to_publish"/>
+		</Unit>
+		<Unit filename="C:/Users/yuval/CLionProjects/dataStructures_wet2/Team.cpp">
+			<Option target="wet24_to_publish"/>
+		</Unit>
+		<Unit filename="C:/Users/yuval/CLionProjects/dataStructures_wet2/Team.h">
+			<Option target="wet24_to_publish"/>
+		</Unit>
 		<Unit filename="C:/Users/yuval/CLionProjects/dataStructures_wet2/hashTable.h">
 			<Option target="wet24_to_publish"/>
 		</Unit>

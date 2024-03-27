@@ -1,4 +1,8 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/wet24_to_publish.dir/Player.cpp.obj"
+  "CMakeFiles/wet24_to_publish.dir/Player.cpp.obj.d"
+  "CMakeFiles/wet24_to_publish.dir/Team.cpp.obj"
+  "CMakeFiles/wet24_to_publish.dir/Team.cpp.obj.d"
   "CMakeFiles/wet24_to_publish.dir/hashTacble.cpp.obj"
   "CMakeFiles/wet24_to_publish.dir/hashTacble.cpp.obj.d"
   "CMakeFiles/wet24_to_publish.dir/main.cpp.obj"
