@@ -21,11 +21,6 @@ hashTable::~hashTable()
 hashTable::hashTable(int size) : maxSize(size), currSize(0)
 {
     table = new AVL<team*, int>*[size];
-    for (int i = 0; i < size; i++)
-    {
-        table[i] = new AVL<team*, int>();
-    }
-
 }
 
 void hashTable::add(team* element, int key)
@@ -41,6 +36,7 @@ void hashTable::add(team* element, int key)
 }
 
 void hashTable::remove(team* element, int key)
+
 {
     int index = hashFunction(key, maxSize);
     table[index]->remove(element, key);
@@ -57,8 +53,6 @@ void hashTable::remove(team* element, int key)
 void hashTable::resize(int newSize)
 {
     AVL<team*, int>** newTable = new AVL<team*, int>*[newSize];
-
-    // TODO: make sure tree has a default constructor
 
     for (int i = 0; i < maxSize; i++)
     {
