@@ -85,6 +85,9 @@
 		<Unit filename="C:/Users/yuval/CLionProjects/dataStructures_wet2/AVL.h">
 			<Option target="wet24_to_publish"/>
 		</Unit>
+		<Unit filename="C:/Users/yuval/CLionProjects/dataStructures_wet2/LinkesList.h">
+			<Option target="wet24_to_publish"/>
+		</Unit>
 		<Unit filename="C:/Users/yuval/CLionProjects/dataStructures_wet2/Player.cpp">
 			<Option target="wet24_to_publish"/>
 		</Unit>
