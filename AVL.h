@@ -29,7 +29,7 @@ private:
         Node* parent;
         Node* left; //left child.
         Node* right; //right child.
-        int rank;
+        int extra;
         int maxScoreInSubtree;
 
 
@@ -41,7 +41,7 @@ private:
             parent(parent),
             left(nullptr),
             right(nullptr),
-            rank(0),
+            extra(0),
             maxScoreInSubtree(0)
             {}
 
@@ -125,9 +125,6 @@ private:
     Node *minNode; //ptr to smallest node in the tree.
     Node *maxNode; //ptr to biggest node in the tree.
 
-    bool updateMinNode;
-    bool updateMaxNode;
-
     /*
     * returns Node with key=key if exists, else return nullptr.
     */
@@ -148,31 +145,53 @@ private:
     /*
      * executes right rotate. returns original left node.
      */
-    Node *right_rotate(Node *nodeToRotate) {
-        Node *leftNode = nodeToRotate->left;
-        Node *rightNodeOfLeftNode = leftNode->right;
-
+    Node *right_rotate(Node *nodeToRotate, int currExtra)
+    {
+        Node* leftNode = nodeToRotate->left;
+        int nodeToRotateExtra = nodeToRotate->extra; // save extra of nodeToRotate.
+        int leftNodeExtra = leftNode->extra; // save extra of nodeToRotate->left.
+        nodeToRotate->extra = leftNodeExtra;
+        leftNode->extra += nodeToRotateExtra;
         //rotate.
 
-        nodeToRotate->left = rightNodeOfLeftNode;
-        if (rightNodeOfLeftNode != nullptr)
+        nodeToRotate->left = leftNode->right;
+        if (leftNode->right != nullptr)
         {
-            rightNodeOfLeftNode->parent = nodeToRotate;
+            leftNode->right->extra += leftNodeExtra;
+            leftNode->right->parent = nodeToRotate;
         }
 
         leftNode->right = nodeToRotate;
         leftNode->parent = nodeToRotate->parent;
         nodeToRotate->parent = leftNode;
 
-        if (leftNode->parent != nullptr) // if org nodeToRotate wasn't root.
+        if (leftNode->parent != nullptr && nodeToRotate->key < leftNode->parent->key) // if org nodeToRotate wasn't root.
         { // needs to update org parent children.
-
+            leftNode->parent->left = leftNode;
         }
+        else
+        {
+            if (leftNode->parent != nullptr)
+            {
+                leftNode->parent->right = leftNode;
+            }
+        }
+
+        nodeToRotate = leftNode;
+
         //update heights.
         nodeToRotate->update_height();
+        if (nodeToRotate->right != nullptr)
+        {
+            nodeToRotate->right->update_height();
+        }
+        if (nodeToRotate->left != nullptr)
+        {
+            nodeToRotate->left->update_height();
+        }
         leftNode->update_height();
 
-        return leftNode;
+        return nodeToRotate;
     }
 
     /*
