@@ -68,7 +68,6 @@ StatusType hashTable::add(Team* value, int key)
         return StatusType::SUCCESS;
     }
 
-    // TODO: ask Idan about this check, maybe do as erase
     // if the element is already in the table
     if (find(key).status() == StatusType::SUCCESS)
     {
@@ -211,5 +210,3 @@ int hashTable::isEmpty() const
 {
     return currSize == 0;
 }
-
-

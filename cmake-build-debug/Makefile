@@ -128,6 +128,30 @@ wet24_to_publish/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\wet24_to_publish.dir\build.make CMakeFiles/wet24_to_publish.dir/build
 .PHONY : wet24_to_publish/fast
 
+LinkedList.obj: LinkedList.cpp.obj
+.PHONY : LinkedList.obj
+
+# target to build an object file
+LinkedList.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\wet24_to_publish.dir\build.make CMakeFiles/wet24_to_publish.dir/LinkedList.cpp.obj
+.PHONY : LinkedList.cpp.obj
+
+LinkedList.i: LinkedList.cpp.i
+.PHONY : LinkedList.i
+
+# target to preprocess a source file
+LinkedList.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\wet24_to_publish.dir\build.make CMakeFiles/wet24_to_publish.dir/LinkedList.cpp.i
+.PHONY : LinkedList.cpp.i
+
+LinkedList.s: LinkedList.cpp.s
+.PHONY : LinkedList.s
+
+# target to generate assembly for a file
+LinkedList.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\wet24_to_publish.dir\build.make CMakeFiles/wet24_to_publish.dir/LinkedList.cpp.s
+.PHONY : LinkedList.cpp.s
+
 Player.obj: Player.cpp.obj
 .PHONY : Player.obj
 
@@ -176,29 +200,29 @@ Team.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\wet24_to_publish.dir\build.make CMakeFiles/wet24_to_publish.dir/Team.cpp.s
 .PHONY : Team.cpp.s
 
-hashTacble.obj: hashTacble.cpp.obj
-.PHONY : hashTacble.obj
+hashTable.obj: hashTable.cpp.obj
+.PHONY : hashTable.obj
 
 # target to build an object file
-hashTacble.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\wet24_to_publish.dir\build.make CMakeFiles/wet24_to_publish.dir/hashTacble.cpp.obj
-.PHONY : hashTacble.cpp.obj
+hashTable.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\wet24_to_publish.dir\build.make CMakeFiles/wet24_to_publish.dir/hashTable.cpp.obj
+.PHONY : hashTable.cpp.obj
 
-hashTacble.i: hashTacble.cpp.i
-.PHONY : hashTacble.i
+hashTable.i: hashTable.cpp.i
+.PHONY : hashTable.i
 
 # target to preprocess a source file
-hashTacble.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\wet24_to_publish.dir\build.make CMakeFiles/wet24_to_publish.dir/hashTacble.cpp.i
-.PHONY : hashTacble.cpp.i
+hashTable.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\wet24_to_publish.dir\build.make CMakeFiles/wet24_to_publish.dir/hashTable.cpp.i
+.PHONY : hashTable.cpp.i
 
-hashTacble.s: hashTacble.cpp.s
-.PHONY : hashTacble.s
+hashTable.s: hashTable.cpp.s
+.PHONY : hashTable.s
 
 # target to generate assembly for a file
-hashTacble.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\wet24_to_publish.dir\build.make CMakeFiles/wet24_to_publish.dir/hashTacble.cpp.s
-.PHONY : hashTacble.cpp.s
+hashTable.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\wet24_to_publish.dir\build.make CMakeFiles/wet24_to_publish.dir/hashTable.cpp.s
+.PHONY : hashTable.cpp.s
 
 main.obj: main.cpp.obj
 .PHONY : main.obj
@@ -233,15 +257,18 @@ help:
 	@echo ... edit_cache
 	@echo ... rebuild_cache
 	@echo ... wet24_to_publish
+	@echo ... LinkedList.obj
+	@echo ... LinkedList.i
+	@echo ... LinkedList.s
 	@echo ... Player.obj
 	@echo ... Player.i
 	@echo ... Player.s
 	@echo ... Team.obj
 	@echo ... Team.i
 	@echo ... Team.s
-	@echo ... hashTacble.obj
-	@echo ... hashTacble.i
-	@echo ... hashTacble.s
+	@echo ... hashTable.obj
+	@echo ... hashTable.i
+	@echo ... hashTable.s
 	@echo ... main.obj
 	@echo ... main.i
 	@echo ... main.s

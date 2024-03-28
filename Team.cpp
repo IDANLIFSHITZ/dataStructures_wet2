@@ -4,25 +4,43 @@
 
 #include "Team.h"
 
-Team::Team(int id) : id(id), players(new LinkedList()), playersTree(new AVL<Player*, int>())
+Team::Team(int id) : id(id), playersList(new LinkedList()),
+                     playersTree(new AVL<Player*, int>()), numOfPlayers(0)
 {
 }
 
 
 Team::~Team()
 {
-    delete players;
+    delete playersList;
     delete playersTree;
 }
 
-void Team::addPlayer(Player* player)
+StatusType Team::addPlayer(int strength)
 {
-    players->add(player);
-    playersTree.insert(player, player->getId());
+    try
+    {
+        Player* player = new Player(numOfPlayers, strength);
+        numOfPlayers++;
+        playersList->add(player);
+        playersTree.insert(player, player->getId());
+    }
+    catch (const std::bad_alloc& e)
+    {
+        return StatusType::ALLOCATION_ERROR;
+    }
+    return StatusType::SUCCESS;
 }
 
-void Team::removeNewestPlayer(Player* player)
+StatusType Team::removeNewestPlayer()
 {
-    int id = players->removeNewest(player);
-    playersTree.remove(player, player->getId());
+    if (numOfPlayers == 0)
+    {
+        return StatusType::FAILURE;
+    }
+    int id = playerList->head->getId();
+    playersList->pop();
+    playersTree.remove(id);
+    numOfPlayers--;
+    return StatusType::SUCCESS;
 }

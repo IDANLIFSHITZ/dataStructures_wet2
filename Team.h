@@ -11,8 +11,8 @@
 class Team {
 private:
     int id;
-    LinkedList* players;
-    AVL<Player*, int> playersTree;
+    LinkedList* playersList;
+    AVL<Player*, int>* playersTree;
     int numOfPlayers;
 public:
 
@@ -20,12 +20,19 @@ public:
 
     explicit Team(int id);
 
+    /**
+     * the big three- copy constructor, destructor and assignment operator
+     */
     ~Team();
     Team(const Team& other) = delete;
     Team& operator=(const Team& other) = delete;
 
-    void addPlayer(Player* player);
-    void removeNewestPlayer(Player* player);
+    /**
+     * public functions: addPlayer, removeNewestPlayer
+     * getId, getNumOfPlayers, getPlayer
+     */
+    StatusType addPlayer(int strength);
+    StatusType removeNewestPlayer();
 
     int getId() const;
     int getNumOfPlayers() const;
