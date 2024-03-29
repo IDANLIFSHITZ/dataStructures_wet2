@@ -85,7 +85,16 @@
 		<Unit filename="C:/Users/yuval/CLionProjects/dataStructures_wet2/AVL.h">
 			<Option target="wet24_to_publish"/>
 		</Unit>
-		<Unit filename="C:/Users/yuval/CLionProjects/dataStructures_wet2/LinkesList.h">
+		<Unit filename="C:/Users/yuval/CLionProjects/dataStructures_wet2/LinkedList.cpp">
+			<Option target="wet24_to_publish"/>
+		</Unit>
+		<Unit filename="C:/Users/yuval/CLionProjects/dataStructures_wet2/LinkedList.h">
+			<Option target="wet24_to_publish"/>
+		</Unit>
+		<Unit filename="C:/Users/yuval/CLionProjects/dataStructures_wet2/Pair.cpp">
+			<Option target="wet24_to_publish"/>
+		</Unit>
+		<Unit filename="C:/Users/yuval/CLionProjects/dataStructures_wet2/Pair.h">
 			<Option target="wet24_to_publish"/>
 		</Unit>
 		<Unit filename="C:/Users/yuval/CLionProjects/dataStructures_wet2/Player.cpp">
@@ -100,13 +109,19 @@
 		<Unit filename="C:/Users/yuval/CLionProjects/dataStructures_wet2/Team.h">
 			<Option target="wet24_to_publish"/>
 		</Unit>
+		<Unit filename="C:/Users/yuval/CLionProjects/dataStructures_wet2/hashTable.cpp">
+			<Option target="wet24_to_publish"/>
+		</Unit>
 		<Unit filename="C:/Users/yuval/CLionProjects/dataStructures_wet2/hashTable.h">
 			<Option target="wet24_to_publish"/>
 		</Unit>
-		<Unit filename="C:/Users/yuval/CLionProjects/dataStructures_wet2/hashTacble.cpp">
+		<Unit filename="C:/Users/yuval/CLionProjects/dataStructures_wet2/main.cpp">
 			<Option target="wet24_to_publish"/>
 		</Unit>
-		<Unit filename="C:/Users/yuval/CLionProjects/dataStructures_wet2/main.cpp">
+		<Unit filename="C:/Users/yuval/CLionProjects/dataStructures_wet2/olympics24a2.cpp">
+			<Option target="wet24_to_publish"/>
+		</Unit>
+		<Unit filename="C:/Users/yuval/CLionProjects/dataStructures_wet2/olympics24a2.h">
 			<Option target="wet24_to_publish"/>
 		</Unit>
 		<Unit filename="C:/Users/yuval/CLionProjects/dataStructures_wet2/CMakeLists.txt">

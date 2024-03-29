@@ -86,7 +86,7 @@ public:
      * @param key
      * @note if the table is less than 25% full, resize it
      */
-    StatusType remove(Team* element, int key);
+    StatusType remove(int key);
 
     /** find an element in the hash table
      * @param key

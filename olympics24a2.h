@@ -16,13 +16,15 @@
 #define OLYMPICSA2_H_
 
 #include "wet2util.h"
+#include "hashTable.h"
+#include "AVL.h"
+#include "Team.h"
 
 class olympics_t {
 private:
-	//
-	// Here you may add anything you want
-	//
-	
+	hashTable* teamsTable;
+    AVL<Team*, int>* teamsTree;
+    int numOfTeams;
 public:
 	// <DO-NOT-MODIFY> {
 

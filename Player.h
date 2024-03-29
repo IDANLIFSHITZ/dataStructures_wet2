@@ -51,7 +51,7 @@ public:
     Player& operator=(const Player& other) = delete;
 
     /**
-     * public functions: getId, getStrength
+     * public functions: getId, setId getStrength
      */
 
     /*
@@ -60,6 +60,12 @@ public:
      */
     int getId() const;
 
+    /*
+     * set the id of the player
+     * @param id the id to set
+     * @return
+     */
+    int setId(int id);
     /*
      * get the strength of the player
      * @return the strength of the player
