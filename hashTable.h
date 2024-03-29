@@ -4,7 +4,8 @@
 
 #ifndef HASHTABLE_H
 #define HASHTABLE_H
-
+#include "AVL.h"
+#include "Team.h"
 
 
 // start of class HashTable
@@ -12,13 +13,23 @@
 // the hash table will resize itself when it is more than 50% full or less than 25% full
 class hashTable {
 private:
-    AVL<team*, int>* table[];
+
     int currSize;
     int maxSize;
-
-    public:
+    AVL<Team*, int>** table;
 
     /**
+     * private functions: resize
+     */
+
+    /* resize the hash table
+    * @param newSize
+    */
+    StatusType resize(int newSize);
+
+public:
+
+    /*
      * the hash function to use
      * @param key
      * @param size
@@ -28,68 +39,70 @@ private:
 
 
 
-    /*
+    /**
      * public functions:
-     * basic constructor (size, hash function)
+     * default constructor
      * copy constructor, destructors and assignment operators
      * add, remove, find
-     * size, maxSize
+     * getSize, isEmpty
      */
 
-    /**
-     * constructor for the hash table
-     * @param size the size of the hash table
+    /*
+     * default constructor for the hash table
      */
-    explicit hashTable(int size);
+    hashTable();
 
     /**
      * the big three- copy constructor, destructor and assignment operator
      */
 
 
-    /** copy constructor for the hash table
+    /* copy constructor for the hash table
      * @param other
      */
     hashTable(const hashTable& other) = delete;
 
-    /** destructor for the hash table
+    /* destructor for the hash table
      */
     ~hashTable();
 
-    /** add a new element to the hash table
+    /* assignment operator for the hash table
+     */
+    hashTable& operator=(const hashTable& other) = delete;
+
+    /**
+     * public functions: add, remove, find
+     */
+
+    /* add a new element to the hash table
      * @param element
      * @param key
      * @note if the table is more than 50% full, resize it
      */
-    void add(team* element, int key);
+    StatusType add(Team* element, int key);
 
     /** remove an element from the hash table
      * @param element
      * @param key
      * @note if the table is less than 25% full, resize it
      */
-    void remove(team* element, int key);
-
-    /** resize the hash table
-     * @param newSize
-     */
-    void resize(int newSize);
+    StatusType remove(Team* element, int key);
 
     /** find an element in the hash table
      * @param key
      * @return the element if found, nullptr otherwise
      */
-    team* find(int key);
+    output_t<Team*> find(int key);
 
     /** get the current size of the hash table
      * @return the current size of the hash table
      */
-    int size() const;
+    int getSize() const;
 
     /** get the maximum size of the hash table
      * @return the maximum size of the hash table
      */
-    int maximumSize() const;
+    int isEmpty() const;
 };
 
 
