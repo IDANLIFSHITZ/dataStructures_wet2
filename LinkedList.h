@@ -6,18 +6,20 @@
 #define WET24_TO_PUBLISH_LINKEDLIST_H
 
 #include "wet2util.h"
+#include "Player.h"
 
 class LinkedList {
 private:
     class Node {
     public:
-        int data;
+        Player* player;
         Node* next;
-        Node(int data, Node* next) : data(data), next(next) {}
+        Node(Player* player, Node* next) : player(player), next(next) {}
         ~Node() = default;
     };
     Node* head;
     int size;
+    friend class Team;
 public:
     // constructor
     LinkedList();
@@ -28,12 +30,15 @@ public:
     // assignment operator
     LinkedList& operator=(const LinkedList& other) = delete;
     // push
-    StatusType push(int data);
+    StatusType push(Player* player);
     // pop
     StatusType pop();
     // get size
     int getSize() const;
+
+    StatusType uniteLists(LinkedList* other);
 };
 
 
-#endif //WET24_TO_PUBLISH_LINKEDLIST_H
+
+#endif // LINKEDLIST_H
