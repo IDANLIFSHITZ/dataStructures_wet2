@@ -96,7 +96,7 @@ StatusType hashTable::add(Team* value, int key)
     return status;
 }
 
-StatusType hashTable::remove(Team* element, int key)
+StatusType hashTable::remove(int key)
 
 {
     int index = hashFunction(key, maxSize);

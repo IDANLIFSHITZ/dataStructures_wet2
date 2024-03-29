@@ -152,6 +152,30 @@ LinkedList.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\wet24_to_publish.dir\build.make CMakeFiles/wet24_to_publish.dir/LinkedList.cpp.s
 .PHONY : LinkedList.cpp.s
 
+Pair.obj: Pair.cpp.obj
+.PHONY : Pair.obj
+
+# target to build an object file
+Pair.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\wet24_to_publish.dir\build.make CMakeFiles/wet24_to_publish.dir/Pair.cpp.obj
+.PHONY : Pair.cpp.obj
+
+Pair.i: Pair.cpp.i
+.PHONY : Pair.i
+
+# target to preprocess a source file
+Pair.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\wet24_to_publish.dir\build.make CMakeFiles/wet24_to_publish.dir/Pair.cpp.i
+.PHONY : Pair.cpp.i
+
+Pair.s: Pair.cpp.s
+.PHONY : Pair.s
+
+# target to generate assembly for a file
+Pair.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\wet24_to_publish.dir\build.make CMakeFiles/wet24_to_publish.dir/Pair.cpp.s
+.PHONY : Pair.cpp.s
+
 Player.obj: Player.cpp.obj
 .PHONY : Player.obj
 
@@ -248,6 +272,30 @@ main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\wet24_to_publish.dir\build.make CMakeFiles/wet24_to_publish.dir/main.cpp.s
 .PHONY : main.cpp.s
 
+olympics24a2.obj: olympics24a2.cpp.obj
+.PHONY : olympics24a2.obj
+
+# target to build an object file
+olympics24a2.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\wet24_to_publish.dir\build.make CMakeFiles/wet24_to_publish.dir/olympics24a2.cpp.obj
+.PHONY : olympics24a2.cpp.obj
+
+olympics24a2.i: olympics24a2.cpp.i
+.PHONY : olympics24a2.i
+
+# target to preprocess a source file
+olympics24a2.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\wet24_to_publish.dir\build.make CMakeFiles/wet24_to_publish.dir/olympics24a2.cpp.i
+.PHONY : olympics24a2.cpp.i
+
+olympics24a2.s: olympics24a2.cpp.s
+.PHONY : olympics24a2.s
+
+# target to generate assembly for a file
+olympics24a2.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\wet24_to_publish.dir\build.make CMakeFiles/wet24_to_publish.dir/olympics24a2.cpp.s
+.PHONY : olympics24a2.cpp.s
+
 # Help Target
 help:
 	@echo The following are some of the valid targets for this Makefile:
@@ -260,6 +308,9 @@ help:
 	@echo ... LinkedList.obj
 	@echo ... LinkedList.i
 	@echo ... LinkedList.s
+	@echo ... Pair.obj
+	@echo ... Pair.i
+	@echo ... Pair.s
 	@echo ... Player.obj
 	@echo ... Player.i
 	@echo ... Player.s
@@ -272,6 +323,9 @@ help:
 	@echo ... main.obj
 	@echo ... main.i
 	@echo ... main.s
+	@echo ... olympics24a2.obj
+	@echo ... olympics24a2.i
+	@echo ... olympics24a2.s
 .PHONY : help
 
 

@@ -1,4 +1,4 @@
-# Install script for directory: C:/Technion/semester3/data structures/wet2/wet24_to_publish
+# Install script for directory: C:/Users/yuval/CLionProjects/dataStructures_wet2
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "C:/Technion/semester3/data structures/wet2/wet24_to_publish/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "C:/Users/yuval/CLionProjects/dataStructures_wet2/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

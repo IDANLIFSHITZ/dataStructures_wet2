@@ -5,7 +5,7 @@
 #include "Team.h"
 
 Team::Team(int id) : id(id), playersList(new LinkedList()),
-                     playersTree(new AVL<Player*, Pair<int,int>()), numOfPlayers(0)
+                     playersTree(new AVL<Player*, Pair<int,int>>()), numOfPlayers(0)
 {
 }
 
@@ -40,10 +40,9 @@ StatusType Team::removeNewestPlayer()
     {
         return StatusType::FAILURE;
     }
-    int id = playersList->head->player->getId();
+    Pair<int,int> pair(playersList->head->player->getStrength(), playersList->head->player->getId());
     playersList->pop();
-    Pair<int,int> pair(player->getStrength(), player->getId()
-    playersTree.remove(id);
+    playersTree.remove(pair);
     numOfPlayers--;
     return StatusType::SUCCESS;
 }
@@ -61,19 +60,19 @@ int Team::getNumOfPlayers() const
 StatusType Team::uniteTeams(Team* other){
     playersList->uniteLists(other->playersList);
 
-    int mySize = playersTree.getSize();
-    int otherSize = other->playersTree.getSize();
+    int mySize = playersTree->get_size();
+    int otherSize = other->playersTree->get_size();
     int unitedSize = mySize + otherSize;
 
-    Pair<Player*, int>* myArrays;
-    Pair<Player*, int>* otherArrays;
+    Pair<Player**, Pair<int,int>*>* myArrays;
+    Pair<Player**, Pair<int,int>*>* otherArrays;
 
     Player** unitedPlayersArray;
-    int* unitedKeysArray;
+    Pair<int,int>* unitedKeysArray;
 
     try
     {
-        otherArrays = other->playersTree.toArray();
+        otherArrays = other->playersTree->toArray();
     }
     catch (const std::bad_alloc& e)
     {
@@ -81,7 +80,7 @@ StatusType Team::uniteTeams(Team* other){
     }
     try
     {
-        myArrays = playersTree.toArray();
+        myArrays = playersTree->toArray();
 
     }
     catch (const std::bad_alloc& e)
@@ -92,7 +91,7 @@ StatusType Team::uniteTeams(Team* other){
     }
     try
     {
-        unitedPlayersArray = new Player*[mySize + otherSize]
+        unitedPlayersArray = new Player*[mySize + otherSize];
     }
     catch (const std::bad_alloc& e)
     {
@@ -102,39 +101,45 @@ StatusType Team::uniteTeams(Team* other){
     }
     try
     {
-        unitedKeysArray = new int[myArrays->getSize() + otherArrays->getSize()];
+        unitedKeysArray = new Pair<int,int>[mySize + otherSize];
     }
     catch (const std::bad_alloc& e)
     {
         deleteArraysFromPair(otherArrays);
         deleteArraysFromPair(myArrays);
-        delete unitedPlayersArray;
+        delete[] unitedPlayersArray;
         return StatusType::ALLOCATION_ERROR;
     }
 
-    // update the id of the players in "my team", starting from the size
+    mergeArrays(myArrays->get_first(), mySize, otherArrays->get_first(), otherSize, unitedPlayersArray, unitedKeysArray);
 
+    deleteArraysFromPair(myArrays);
+    deleteArraysFromPair(otherArrays);
 
+    delete playersTree;
+    playersTree = new AVL<Player*, Pair<int,int>>(unitedPlayersArray, unitedKeysArray, unitedSize);
 
+    delete other->playersList;
+    other->playersList = nullptr;
 
+    delete other->playersTree;
+    other->playersTree = nullptr;
 
-
-
-
+    delete[] unitedPlayersArray;
+    delete[] unitedKeysArray;
 }
 
-StatusType deleteArraysFromPair(const Pair<Player*, int>* pair)
+StatusType deleteArraysFromPair(const Pair<Player**, Pair<int,int>* >* pair)
 {
-    Player** playersArray = pair->getFirst();
-    int* keysArray = pair->getSecond();
+    Player** playersArray = pair->get_first();
+    Pair<int,int>* keysArray = pair->get_second();
 
     delete[] playersArray;
     delete[] keysArray;
 }
 
 
-StatusType mergeArrays(PLayer** arr1, int size1, Player** arr2, int size2,
-                       Player** mergedPlayerArr, int sizeMerged, Pair* mergedKeysArr){
+StatusType mergeArrays(Player** arr1, int size1, Player** arr2, int size2, Player** mergedPlayerArr, Pair<int,int>* mergedKeysArr){
     int i = 0, j = 0, k = 0;
     while (i < size1 && j < size2){
         if (arr1[i] < arr2[j]){
@@ -143,22 +148,23 @@ StatusType mergeArrays(PLayer** arr1, int size1, Player** arr2, int size2,
             mergedKeysArr[k] = pair;
             i++;
         } else {
-            mergedArr[k] = arr2[j];
-            mergedKeysArr[k] = arr2[j]->getId();
+            mergedPlayerArr[k] = arr2[j];
+            Pair<int,int> pair(arr1[j]->getStrength(), arr1[j]->getId());
+            mergedKeysArr[k] = pair;
             j++;
         }
         k++;
     }
     while (i < size1){
-        mergedArr[k] = arr1[i];
-        Pair pair(arr1[i]->getStrength(), arr1[i]->getId());
+        mergedPlayerArr[k] = arr1[i];
+        Pair<int,int> pair(arr1[i]->getStrength(), arr1[i]->getId());
         mergedKeysArr[k] = pair;
         i++;
         k++;
     }
     while (j < size2){
-        mergedArr[k] = arr2[j];
-        Pair pair(arr2[j]->getStrength(), arr2[j]->getId());
+        mergedPlayerArr[k] = arr2[j];
+        Pair<int,int> pair(arr2[j]->getStrength(), arr2[j]->getId());
         mergedKeysArr[k] = pair;
         j++;
         k++;

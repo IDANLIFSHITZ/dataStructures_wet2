@@ -7,7 +7,7 @@
 
 
 template<class T, class S>
-class Pair{
+class Pair {
 private:
     T first;
     S second;
@@ -68,7 +68,7 @@ public:
     /*
      * returns first item in pair.
      */
-    T get_first()
+    T get_first() const
     {
         return this->first;
     }
@@ -76,7 +76,7 @@ public:
     /*
      * returns second item in pair.
      */
-    S get_second()
+    S get_second() const
     {
         return this->second;
     }

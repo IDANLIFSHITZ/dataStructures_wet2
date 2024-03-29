@@ -1,6 +1,8 @@
 file(REMOVE_RECURSE
   "CMakeFiles/wet24_to_publish.dir/LinkedList.cpp.obj"
   "CMakeFiles/wet24_to_publish.dir/LinkedList.cpp.obj.d"
+  "CMakeFiles/wet24_to_publish.dir/Pair.cpp.obj"
+  "CMakeFiles/wet24_to_publish.dir/Pair.cpp.obj.d"
   "CMakeFiles/wet24_to_publish.dir/Player.cpp.obj"
   "CMakeFiles/wet24_to_publish.dir/Player.cpp.obj.d"
   "CMakeFiles/wet24_to_publish.dir/Team.cpp.obj"
@@ -9,6 +11,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/wet24_to_publish.dir/hashTable.cpp.obj.d"
   "CMakeFiles/wet24_to_publish.dir/main.cpp.obj"
   "CMakeFiles/wet24_to_publish.dir/main.cpp.obj.d"
+  "CMakeFiles/wet24_to_publish.dir/olympics24a2.cpp.obj"
+  "CMakeFiles/wet24_to_publish.dir/olympics24a2.cpp.obj.d"
   "libwet24_to_publish.dll.a"
   "wet24_to_publish.exe"
   "wet24_to_publish.exe.manifest"

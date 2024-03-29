@@ -7,10 +7,13 @@
 #include "Player.h"
 #include "LinkedList.h"
 #include "AVL.h"
+#include "Pair.h"
+
 
 class Team {
 private:
     int id;
+
     LinkedList* playersList;
     AVL<Player*, Pair<int,int>>* playersTree;
     int numOfPlayers;
@@ -40,33 +43,11 @@ public:
 
     StatusType uniteTeams(Team* other);
 };
-
-StatusType deleteArraysFromPair(const Pair<Player*, int>* pair);
-
-template <class T>
-StatusType mergeArrays(T* arr1, int size1, T* arr2, int size2, T* mergedArr, int sizeMerged){
-    int i = 0, j = 0, k = 0;
-    while (i < size1 && j < size2){
-        if (arr1[i] < arr2[j]){
-            mergedArr[k] = arr1[i];
-            i++;
-        } else {
-            mergedArr[k] = arr2[j];
-            j++;
-        }
-        k++;
-    }
-    while (i < size1){
-        mergedArr[k] = arr1[i];
-        i++;
-        k++;
-    }
-    while (j < size2){
-        mergedArr[k] = arr2[j];
-        j++;
-        k++;
-    }
-    return StatusType::SUCCESS;
-}
+/**
+ * helper functions
+ */
+StatusType deleteArraysFromPair(const Pair<Player**, Pair<int,int>* >* pair);
+StatusType mergeArrays(Player** arr1, int size1, Player** arr2, int size2,
+                       Player** mergedPlayerArr, Pair<int,int>* mergedKeysArr);
 
 #endif // TEAM_H
