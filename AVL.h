@@ -3,7 +3,9 @@
 //
 
 #include <iostream>
+#include <functional>
 #include "wet2util.h"
+#include "Pair.h"
 
 #ifndef WET24_TO_PUBLISH_AVL_H
 #define WET24_TO_PUBLISH_AVL_H
@@ -30,7 +32,7 @@ private:
         Node* left; //left child.
         Node* right; //right child.
         int extra;
-        int maxScoreInSubtree;
+        int maxSubtreeRank;
 
 
         explicit Node(valT data, const keyT& key, Node* parent = nullptr) :
@@ -42,8 +44,7 @@ private:
             left(nullptr),
             right(nullptr),
             extra(0),
-            maxScoreInSubtree(0)
-            {}
+            maxSubtreeRank(0){}
 
         ~Node()
         {
@@ -54,6 +55,7 @@ private:
 
         /*
          * operators on Node class:
+         * assumes keyT has operators: ==, !=, <, >.
          */
         bool operator==(const Node &node) {
             return (this->key == node.key);
@@ -71,6 +73,7 @@ private:
             return (this->key > node.key);
         }
         ///////////////////////////////////////
+
         /*
         * returns height of node.
         */
@@ -82,6 +85,38 @@ private:
         }
 
         /*
+        * updates height of node;
+        */
+        static void update_node_height(Node* node)
+        {
+            if (node != nullptr)
+            {
+                node->height = max(get_height(node->left), get_height(node->right)) + 1;
+            }
+        }
+
+        /*
+        * returns subtreeSize of node.
+        */
+        static int get_subtreeSize(Node *node) {
+            if (node == nullptr) {
+                return 0;
+            }
+            return node->subtreeSize;
+        }
+
+        /*
+         * updates subtreeSize of node.
+         */
+        static void update_subtreeSize(Node* node)
+        {
+            if (node != nullptr)
+            {
+                node->subtreeSize = update_subtreeSize(node->left) + update_subtreeSize(node->right) + 1;
+            }
+        }
+
+        /*
          * calculates and returns balance factor.
          */
         int get_balance() const {
@@ -90,40 +125,210 @@ private:
             }
             return (get_height(this->left) - get_height(this->right));
         }
-
-        /*
-         * updates height of Node;
-         */
-        void update_height() {
-            this->height = max(get_height(this->left), get_height(this->right)) + 1;
-        }
-
-        /*
-         * removes node from tree and updates parents and children.
-         */
-        /*
-        void remove()
-        {
-            if (this->left == nullptr && this->right == nullptr) // if node has no children.
-            {
-                if (parent->left == this) //if left child of parent.
-                {
-                    parent->left = nullptr;
-                }
-                else
-                {
-                    parent->right = nullptr;
-                }
-            }
-        }
-         */
     };
 
     Node *root; //root of AVL tree.
     int numOfNodes;
 
-    Node *minNode; //ptr to smallest node in the tree.
-    Node *maxNode; //ptr to biggest node in the tree.
+    Node* minNode; //ptr to smallest node in the tree.
+    Node* maxNode; //ptr to biggest node in the tree.
+
+    /*
+    * updates maxSubtreeRank of node.
+    */
+    void update_maxSubtreeRank(Node* node)
+    {
+        int currRank = this->calc_power(node->data) ;
+        int maxRankLeft = (node->left != nullptr) ? // get left maxSubtreeRank.
+                          node->left->maxSubtreeRank : 0;
+        int maxRankRight = (node->right != nullptr) ? // get right maxSubtreeRank.
+                           node->right->maxSubtreeRank : 0;
+
+        node->maxScoreInSubTree = AVL::max(currRank, AVL::max(maxRankLeft, maxRankRight)); //calc maxSubtreeRank.
+        node->maxScoreInSubTree += (node->maxScoreInSubTree != 0)
+                                   ? node->extra : 0;
+    }
+
+    /*
+     * executes right rotate. returns original left node.
+     */
+    Node *right_rotate(Node *nodeToRotate)
+    {
+        /*
+         * part 1: rotate.
+        */
+        Node* leftNode = nodeToRotate->left;
+        int nodeToRotateExtra = nodeToRotate->extra; // save extra of nodeToRotate.
+        int leftNodeExtra = leftNode->extra; // save extra of nodeToRotate->left.
+
+        //update extra field.
+        nodeToRotate->extra = -1 * leftNodeExtra;
+        leftNode->extra += nodeToRotateExtra;
+
+        // updates new left child parent and extra.
+        nodeToRotate->left = leftNode->right;
+        if (leftNode->right != nullptr) // if left child has right child (new left child).
+        {
+            leftNode->right->extra += leftNodeExtra;
+            leftNode->right->parent = nodeToRotate;
+        }
+
+        //update leftNode to be new nodeToRotate.
+        leftNode->right = nodeToRotate;
+        leftNode->parent = nodeToRotate->parent;
+        nodeToRotate->parent = leftNode;
+
+
+        // updates org parent children.
+        if (leftNode->parent != nullptr) // if nodeToRotate had parent.
+        {
+            if (nodeToRotate->key < leftNode->parent->key) // if was left child.
+            {
+                leftNode->parent->left = leftNode;
+            }
+            else  // else was right child.
+            {
+                leftNode->parent->right = leftNode;
+            }
+        }
+
+        /*
+         * part 2: update heights, subtreeSizeRank, max.
+        */
+        // update nodeToRotate:
+        //update height.
+        Node::update_node_height(nodeToRotate);
+
+        //update subtreeSize.
+        Node::update_subtreeSize(nodeToRotate);
+
+        //update maxSubtreeRank.
+        if (nodeToRotate->left != nullptr)
+        {
+            this->update_maxSubtreeRank(nodeToRotate->left);
+        }
+        this->update_maxSubtreeRank(nodeToRotate);
+        ///////////////////////////////////////////////////////////////////
+
+        // update leftNode:
+        //update height.
+        Node::update_node_height(leftNode);
+
+        //update subtreeSize.
+        Node::update_subtreeSize(leftNode);
+
+        //update maxSubtreeRank.
+        this->update_maxSubtreeRank(leftNode);
+        ///////////////////////////////////////////////////////////////////
+
+        return leftNode; //return new nodeToRotate.
+    }
+
+    /*
+     * executes right rotate. returns original right node.
+     */
+    Node* left_rotate(Node *nodeToRotate) {
+        /*
+         * part 1: rotate.
+        */
+        Node* rightNode = nodeToRotate->right;
+        int nodeToRotateExtra = nodeToRotate->extra; // save extra of nodeToRotate.
+        int rightNodeExtra = rightNode->extra; // save extra of nodeToRotate->left.
+
+        //update extra field.
+        nodeToRotate->extra = -1 * rightNodeExtra;
+        rightNode->extra += nodeToRotateExtra;
+
+        // updates new right child parent and extra.
+        nodeToRotate->right = rightNode->left;
+        if (rightNode->left != nullptr) // if left child has right child (new left child).
+        {
+            rightNode->left->extra += rightNodeExtra;
+            rightNode->left->parent = nodeToRotate;
+        }
+
+        //update rightNode to be new nodeToRotate.
+        rightNode->left = nodeToRotate;
+        rightNode->parent = nodeToRotate->parent;
+        nodeToRotate->parent = rightNode;
+
+
+        // updates org parent children.
+        if (rightNode->parent != nullptr) // if nodeToRotate had parent.
+        {
+            if (nodeToRotate->key < rightNode->parent->key) // if was left child.
+            {
+                rightNode->parent->left = rightNode;
+            }
+            else  // else was right child.
+            {
+                rightNode->parent->right = rightNode;
+            }
+        }
+
+        /*
+         * part 2: update heights, subtreeSizeRank, max.
+        */
+        // update nodeToRotate:
+        //update height.
+        Node::update_node_height(nodeToRotate);
+
+        //update subtreeSize.
+        Node::update_subtreeSize(nodeToRotate);
+
+        //update maxSubtreeRank.
+        if (nodeToRotate->right != nullptr)
+        {
+            this->update_maxSubtreeRank(nodeToRotate->right);
+        }
+        this->update_maxSubtreeRank(nodeToRotate);
+        ///////////////////////////////////////////////////////////////////
+
+        // update rightNode:
+        //update height.
+        Node::update_node_height(rightNode);
+
+        //update subtreeSize.
+        Node::update_subtreeSize(rightNode);
+
+        //update maxSubtreeRank.
+        this->update_maxSubtreeRank(rightNode);
+        ///////////////////////////////////////////////////////////////////
+
+        return rightNode; //return new nodeToRotate.
+    }
+
+    /*
+     * checks if NodeToBalance needs to be balanced and balances it.
+     */
+    Node* balance(Node* nodeToBalance)
+    {
+        int balanceFactor = nodeToBalance->get_balance();
+        //LL rotate.
+        if (balanceFactor > 1 && *nodeToBalance < *nodeToBalance->left)
+        {
+            nodeToBalance = right_rotate(nodeToBalance);
+        }
+            //RR rotate.
+        else if (balanceFactor < -1 && *nodeToBalance > *nodeToBalance->right)
+        {
+            nodeToBalance = left_rotate(nodeToBalance);
+        }
+            //LR rotate.
+        else if (balanceFactor > 1 && *nodeToBalance > *nodeToBalance->left)
+        {
+            nodeToBalance->left = left_rotate(nodeToBalance->left);
+            nodeToBalance = right_rotate(nodeToBalance);
+        }
+            //RL rotate.
+        else if (balanceFactor < -1 && *nodeToBalance < *nodeToBalance->right)
+        {
+            nodeToBalance->right = right_rotate(nodeToBalance->right);
+            nodeToBalance = left_rotate(nodeToBalance);
+        }
+
+        return nodeToBalance;
+    }
 
     /*
     * returns Node with key=key if exists, else return nullptr.
@@ -132,10 +337,12 @@ private:
         if (currNode == nullptr) //if in empty leaf.
         {
             return nullptr;
-        } else if (currNode->key > key) //if key is in left subtree.
+        }
+        else if (currNode->key > key) //if key is in left subtree.
         {
             return search_aux(currNode->left, key);
-        } else if (currNode->key < key) //if key is in right subtree.
+        }
+        else if (currNode->key < key) //if key is in right subtree.
         {
             return search_aux(currNode->right, key);
         }
@@ -143,124 +350,52 @@ private:
     }
 
     /*
-     * executes right rotate. returns original left node.
-     */
-    Node *right_rotate(Node *nodeToRotate, int currExtra)
-    {
-        Node* leftNode = nodeToRotate->left;
-        int nodeToRotateExtra = nodeToRotate->extra; // save extra of nodeToRotate.
-        int leftNodeExtra = leftNode->extra; // save extra of nodeToRotate->left.
-        nodeToRotate->extra = leftNodeExtra;
-        leftNode->extra += nodeToRotateExtra;
-        //rotate.
-
-        nodeToRotate->left = leftNode->right;
-        if (leftNode->right != nullptr)
-        {
-            leftNode->right->extra += leftNodeExtra;
-            leftNode->right->parent = nodeToRotate;
-        }
-
-        leftNode->right = nodeToRotate;
-        leftNode->parent = nodeToRotate->parent;
-        nodeToRotate->parent = leftNode;
-
-        if (leftNode->parent != nullptr && nodeToRotate->key < leftNode->parent->key) // if org nodeToRotate wasn't root.
-        { // needs to update org parent children.
-            leftNode->parent->left = leftNode;
-        }
-        else
-        {
-            if (leftNode->parent != nullptr)
-            {
-                leftNode->parent->right = leftNode;
-            }
-        }
-
-        nodeToRotate = leftNode;
-
-        //update heights.
-        nodeToRotate->update_height();
-        if (nodeToRotate->right != nullptr)
-        {
-            nodeToRotate->right->update_height();
-        }
-        if (nodeToRotate->left != nullptr)
-        {
-            nodeToRotate->left->update_height();
-        }
-        leftNode->update_height();
-
-        return nodeToRotate;
-    }
-
-    /*
-     * executes right rotate. returns original right node.
-     */
-    Node *left_rotate(Node *nodeToRotate) {
-        Node *rightNode = nodeToRotate->right;
-        Node *leftNodeOfRightNode = rightNode->left;
-
-        //rotate.
-        rightNode->left = nodeToRotate;
-        nodeToRotate->right = leftNodeOfRightNode;
-
-        //update heights.
-        nodeToRotate->update_height();
-        rightNode->update_height();
-
-        return rightNode;
-    }
-
-    /*
      * adds a new node to the tree recursively.
      * returns the node that in supposed to be the current node in the recursion after insertion and rotations.
      */
-    Node *insert_aux(Node *currNode, Node *newNode) {
+    Node *insert_aux(Node *currNode, Node *newNode)
+    {
         /* part 1: normal tree insertion. */
 
         if (currNode == nullptr) //if arrived at leaf.
         {
+            this->update_maxSubtreeRank(newNode);
             return newNode;
         }
+
+        //subtract current node extra.
+        newNode->extra -= currNode->extra;
 
         if (*newNode < *currNode) //if newNode belong in left subtree.
         {
             currNode->left = insert_aux(currNode->left, newNode);
-        } else if (*newNode > *currNode) //if newNode belong in right subtree.
+            if (currNode->left != nullptr) //update new left child parent.
+            {
+                currNode->left->parent = currNode;
+            }
+        }
+        else if (*newNode > *currNode) //if newNode belong in right subtree.
         {
             currNode->right = insert_aux(currNode->right, newNode);
-        } else // newNode already in AVL tree.
+            if (currNode->right != nullptr) //update new right child parent.
+            {
+                currNode->right->parent = currNode;
+            }
+        }
+        else // newNode already in AVL tree.
         {
             throw alreadyInTree();
         }
 
-        /* part 2: update height */
+        /* part 2: update height, subtreeSize, maxSubtreeRank: */
 
-        currNode->update_height();
+        Node::update_node_height(currNode);
+        Node::update_subtreeSize(currNode);
+        this->update_maxSubtreeRank(currNode);
 
         /* part 3: calc balance factor and perform rotations if tree  is unbalanced */
 
-        int balanceFactor = currNode->get_balance();
-        //LL rotate.
-        if (balanceFactor > 1 && *newNode < *currNode->left) {
-            currNode = right_rotate(currNode);
-        }
-            //RR rotate.
-        else if (balanceFactor < -1 && *newNode > *currNode->right) {
-            currNode = left_rotate(currNode);
-        }
-            //LR rotate.
-        else if (balanceFactor > 1 && *newNode > *currNode->left) {
-            currNode->left = left_rotate(currNode->left);
-            currNode = right_rotate(currNode);
-        }
-            //RL rotate.
-        else if (balanceFactor < -1 && *newNode < *currNode->right) {
-            currNode->right = right_rotate(currNode->right);
-            currNode = left_rotate(currNode);
-        }
-        return currNode;
+        return this->balance(currNode);
     }
 
     /*
@@ -273,23 +408,6 @@ private:
             node = node->left;
         }
         return node;
-    }
-
-    /*
-     * returns smallest node in tree with root of currNode.
-     * assumes tree is has at least two nodes and if currNode is minNode of subtree returns him.
-     */
-    Node* get_father_of_min_node(Node* currNode, Node* miniNode)
-    {
-        if (currNode == miniNode)
-        {
-            return currNode;
-        }
-        while (currNode->left != miniNode) //while there is a left child.
-        {
-            currNode = currNode->left;
-        }
-        return currNode;
     }
 
     /*
@@ -320,6 +438,7 @@ private:
         {
             currNode->left = remove_aux(currNode->left, keyToDelete);
         }
+
         else if (currNode->key < keyToDelete) //if key is in right subtree.
         {
             currNode->right = remove_aux(currNode->right, keyToDelete);
@@ -331,30 +450,38 @@ private:
             {
                 Node *temp = currNode->left ? currNode->left
                                             : currNode->right; //if has left child: temp = left child, else temp = right child.
+                temp->parent = currNode->parent;
+                currNode->parent = nullptr;
+                currNode->left = nullptr;
+                currNode->right = nullptr;
                 delete currNode; // deletes old node.
+
                 currNode = temp; //currNode = son if exists, if not nullptr.
             }
             else //currNode has two children.
             {
                 Node* nextBiggest = get_min_node(currNode->right); //nextBiggest is the smallest node that is bigger then currNode.
-                Node* nextBiggestParent = get_father_of_min_node(currNode->right, nextBiggest);
 
                 Node* node2Delete = currNode;
                 Node* node2DeleteLeft = currNode->left;
                 Node* node2DeleteRight = currNode->right;
+
+                // update children.
                 node2Delete->right = nextBiggest->right;
                 node2Delete->left = nextBiggest->left; //nextBiggest->left = nullptr (always).
 
+                //update currNode to be next biggest node in subtree.
                 currNode = nextBiggest;
                 currNode->left = node2DeleteLeft;
                 currNode->right = node2DeleteRight;
-                if (nextBiggest == nextBiggestParent) //if next biggest is currNode->right.
+
+                if (nextBiggest == nextBiggest->parent) //if next biggest is currNode->right.
                 {
                     currNode->right = node2Delete;
                 }
                 else //if next biggest is not currNode->right (somewhere in subtree.).
                 {
-                    nextBiggestParent->left = node2Delete;
+                    nextBiggest->parent->left = node2Delete;
                 }
                 currNode->right = remove_aux(currNode->right, keyToDelete);
             }
@@ -371,68 +498,85 @@ private:
 
         /* part 3: calc balance factor and perform rotations if tree  is unbalanced */
 
-        int balanceFactor = currNode->get_balance();
-        //LL rotate.
-        if (balanceFactor > 1 && currNode->left->get_balance() >= 0)
-        {
-            currNode = right_rotate(currNode);
-        }
-            //RR rotate.
-        else if (balanceFactor < -1 && currNode->right->get_balance() <= 0)
-        {
-            currNode = left_rotate(currNode);
-        }
-            //LR rotate.
-        else if (balanceFactor > 1 && currNode->left->get_balance() < 0)
-        {
-            currNode->left = left_rotate(currNode->left);
-            currNode = right_rotate(currNode);
-        }
-            //RL rotate.
-        else if (balanceFactor < -1 && currNode->right->get_balance() > 0)
-        {
-            currNode->right = right_rotate(currNode->right);
-            currNode = left_rotate(currNode);
-        }
-
-        return currNode;
+        return this->balance(currNode);
     }
 
     /*
      * adds current node to Array at index and adds subtrees.
      * returns updated index after all insertions.
      */
-    /*
-    int tree_to_sorted_array(Pair<keyT, valT>* array, int index, Node *currNode) const {
-        if (currNode == nullptr) {
+    int tree_to_sorted_array(valT* values, keyT* keys, int index, Node* currNode) const {
+        if (currNode == nullptr)
+        {
             return index;
         }
-        index = tree_to_sorted_array(array, index, currNode->left); //adds left subtree to Array.
-        Pair<keyT, valT> pair(currNode->key, currNode->data);
-        array[index++] = pair;
-        index = tree_to_sorted_array(array, index, currNode->right); //adds right subtree to Array.
+        index = tree_to_sorted_array(values, keys, index, currNode->left); //adds left subtree to Array.
+        values[index] = currNode->data;
+        values[index++] = currNode->key;
+        index = tree_to_sorted_array(values, keys, index, currNode->right); //adds right subtree to Array.
         return index;
     }
-    */
+
 
     /*
      * builds tree from sorted array, returns root of recursive tree.
      */
-    /*
-    Node* sorted_array_to_tree(Pair<keyT, valT> *array, int start, int end) {
-        if (start > end) {
+    Node* sorted_array_to_tree(valT* values, keyT* keys, int start, int end)
+    {
+        if (start > end)
+        {
             return nullptr;
         }
-
+        Node* newRoot = nullptr;
         int mid = (start + end) / 2;
-        Node *newRoot = new Node(array[mid].get_second(), array[mid].get_first()); //create new root of recursive tree.
+        try
+        {
+            newRoot = new Node(values[mid], keys[mid]); //create new root of recursive tree.
+            int leftSubtreeSize = 0, rightSubtreeSize = 0;
 
-        newRoot->left = sorted_array_to_tree(array, start, mid - 1); //create left subtree recursively.
-        newRoot->right = sorted_array_to_tree(array, mid + 1, end); //create right subtree recursively.
+            //create left child subtree from array.
+            newRoot->left = sorted_array_to_tree(values, keys, start, mid - 1); //create left subtree recursively.
+            if (newRoot->left != nullptr) //update new left child parent.
+            {
+                newRoot->left->parent = newRoot;
+                leftSubtreeSize = newRoot->left->subtreeSize;
+            }
 
-        return newRoot;
+            //create right child subtree from array.
+            newRoot->right = sorted_array_to_tree(values, keys, mid + 1, end); //create right subtree recursively.
+            if (newRoot->right != nullptr) //update new right child parent.
+            {
+                newRoot->right->parent = newRoot;
+                rightSubtreeSize = newRoot->right->subtreeSize;
+            }
+
+            //update newRoot.
+            this->update_node_height(newRoot);
+            newRoot->subtreeSize = leftSubtreeSize + rightSubtreeSize + 1;
+
+            return newRoot;
+        }
+        catch (std::bad_alloc& err)
+        {
+            if (newRoot != nullptr)
+            {
+                if (newRoot->parent != nullptr) //if already updated parent.
+                {
+                    if (newRoot->parent->left == newRoot) //if left child.
+                    {
+                        newRoot->parent->left = nullptr;
+                    }
+                    else //is right child.
+                    {
+                        newRoot->parent->right = nullptr;
+                    }
+                }
+                delete newRoot;
+            }
+            throw std::bad_alloc();
+        }
+        return nullptr;
     }
-    */
 
     /*
      * clears all nodes in the tree with root of currRoot recursively.
@@ -446,90 +590,113 @@ private:
         delete currRoot->data;
     }
 
+    /*
+     * creates new tree and copies all values and keys from tree.
+     */
+    Node* hard_copy(Node* currNode, Node* newParent)
+    {
+        if (currNode == nullptr)
+        {
+            return nullptr;
+        }
+        Node* newCopy = nullptr;
+        try
+        {
+            int leftSubtreeSize = 0, rightSubtreeSize = 0;
+            newCopy = new Node(currNode->data, currNode->key, newParent);
+
+            //hard copy left subtree.
+            newCopy->left = hard_copy(currNode->left, newCopy);
+            if (newCopy->left != nullptr)
+            {
+                leftSubtreeSize = newCopy->left->subtreeSize;
+            }
+
+            //hard copy right subtree.
+            newCopy->right = hard_copy(currNode->right, newCopy);
+            if (newCopy->right != nullptr)
+            {
+                rightSubtreeSize = newCopy->right->subtreeSize;
+            }
+
+            //update newCopy.
+            this->update_node_height(newCopy);
+            newCopy->subtreeSize = leftSubtreeSize + rightSubtreeSize + 1;
+
+            return newCopy;
+        }
+        catch (std::bad_alloc& err)
+        {
+            if (newCopy != nullptr)
+            {
+                if (newCopy->parent != nullptr) //if already updated parent.
+                {
+                    if (newCopy->parent->left == newCopy) //if left child.
+                    {
+                        newCopy->parent->left = nullptr;
+                    }
+                    else //is right child.
+                    {
+                        newCopy->parent->right = nullptr;
+                    }
+                }
+                delete newCopy;
+            }
+            throw std::bad_alloc();
+        }
+    }
+
 public:
+    /*
+     * public members:
+     */
+    std::function<int(const valT&)> calc_power;
+
+    ////////////////////////////////
+
+    /*
+     * AVL constructor for non team AVL trees that don't need calc_power function.
+     */
     AVL<valT, keyT>() : root(nullptr),
                         numOfNodes(0),
                         minNode(nullptr),
                         maxNode(nullptr),
-                        updateMinNode(false),
-                        updateMaxNode(false){}
+                        calc_power([](const valT&)->int{return 0;}){}
 
     /*
-     * constructs AVL tree from sorted Array.
+     * AVL constructor for team AVL trees.
+     */
+    AVL<valT, keyT>(std::function<int(const valT&)> calc_power) : root(nullptr),
+                                                                  numOfNodes(0),
+                                                                  minNode(nullptr),
+                                                                  maxNode(nullptr),
+                                                                  calc_power(calc_power){}
+
+    /*
+     * AVL constructor from sorted Array.
      * time complexity of O(array.size).
      */
-    //SortedArray<Pair<Pair<int, int>, Contestant*>>* contestantArrayByStrength1 = this->make_contestant_array_by_strength();
-    /*
-    explicit AVL<valT, keyT>(SortedArray<Pair<keyT, valT>>* array) : root(nullptr),
-                                                                     numOfNodes(0),
-                                                                     minNode(nullptr),
-                                                                     secondMinNode(nullptr),
-                                                                     thirdMinNode(nullptr),
-                                                                     maxNode(nullptr),
-                                                                     secondMaxNode(nullptr),
-                                                                     thirdMaxNode(nullptr),
-                                                                     updateMinNode(false),
-                                                                     updateSecondMinNode(false),
-                                                                     updateThirdMinNode(false),
-                                                                     updateMaxNode(false),
-                                                                     updateSecondMaxNode(false),
-                                                                     updateThirdMaxNode(false){
-        this->numOfNodes = array->get_size();
-        this->root = sorted_array_to_tree(array->get_sorted_array(), 0,
-                                          this->numOfNodes-1); //builds tree from sorted array.
 
-        int indexMin1 = 0, indexMin2 = 0, indexMin3 = 0;
-        int indexMax1 = 0, indexMax2 = 0, indexMax3 = 0;
-        if (array->get_size() == 2)
-        {
-            indexMin2 = 1;
-            indexMin3 = 1;
-            indexMax1 = 1;
-        }
-        else if (array->get_size() >= 3)
-        {
-            indexMin1 = 0;
-            indexMin2 = 1;
-            indexMin3 = 2;
-            indexMax1 = array->get_size() - 1;
-            indexMax2 = array->get_size() - 2;
-            indexMax3 = array->get_size() - 3;
-        }
+    AVL<valT, keyT>(valT* values, keyT* keys, int size) : numOfNodes(size),
+                                                          calc_power([](const valT&)->int{return 0;})
+    {
+        this->root = sorted_array_to_tree(values, keys, 0, this->numOfNodes-1); //builds tree from sorted array.
 
-        //get min nodes from built tree.
-
-        // SortedArray<Pair<int, Contestant*>>* newContestantArrayByID1 = new SortedArray<Pair<int, Contestant*>>(arr1Size);
-        // SortedArray<Pair<Pair<int, int>, Contestant*>>* contestantArrayByStrength1 = this->make_contestant_array_by_strength();
-        Pair<keyT, valT> curr1 = array->get_sorted_array()[indexMin1];
-        Pair<keyT, valT> curr2 = array->get_sorted_array()[indexMin2];
-        Pair<keyT, valT> curr3 = array->get_sorted_array()[indexMin3];
-        this->minNode = this->search_aux(this->root, curr1.get_first());
-        this->secondMinNode = this->search_aux(this->root, curr2.get_first());
-        this->thirdMinNode = this->search_aux(this->root, curr3.get_first());
-        this->updateMinNode = false;
-        this->updateSecondMinNode = false;
-        this->updateThirdMinNode = false;
-
-        //get max nodes from built tree.
-        Pair<keyT, valT> curr11 = array->get_sorted_array()[indexMax1];
-        Pair<keyT, valT> curr21 = array->get_sorted_array()[indexMax2];
-        Pair<keyT, valT> curr31 = array->get_sorted_array()[indexMax3];
-        this->maxNode = this->search_aux(this->root, curr11.get_first());
-        this->secondMaxNode = this->search_aux(this->root, curr21.get_first());
-        this->thirdMaxNode = this->search_aux(this->root, curr31.get_first());
-        this->updateMaxNode = false;
-        this->updateSecondMaxNode = false;
-        this->updateThirdMaxNode = false;
+        //get min and max nodes from built tree.
+        this->minNode = this->get_min_node();
+        this->maxNode = this->get_max_node();
     }
-    */
 
+    /*
+     * destructor, destructs the tree recursively from root.
+     */
     ~AVL()
     {
         delete this->root;
     }
 
     /*
-     * destroys tree.
+     * destroys tree content.
      */
     void clear()
     {
@@ -621,7 +788,8 @@ public:
      *         FAILURE- the node is not in the tree.
      * time complexity of O(log(tree.nunOfNodes)).
      */
-    StatusType remove(keyT key) {
+    StatusType remove(keyT key)
+    {
         try {
             this->root = remove_aux(this->root, key);
             this->numOfNodes--;
@@ -638,26 +806,18 @@ public:
             }
             else // general case.
             {
-                if (this->updateMinNode)
-                {
-                    this->minNode = this->get_min_node();
-                }
-                else if (this->updateMaxNode)
-                {
-                    this->maxNode = this->get_max_node();
-                }
+                this->minNode = this->get_min_node();
+                this->maxNode = this->get_max_node();
             }
         }
-        catch (std::bad_alloc& err) {
+        catch (std::bad_alloc& err)
+        {
             return StatusType::ALLOCATION_ERROR;
         }
-        catch (notInTree& err) {
+        catch (notInTree& err)
+        {
             return StatusType::FAILURE;
         }
-        this->updateMinNode = false;
-        this->updateMaxNode = false;
-        this->updateSecondMaxNode = false;
-        this->updateThirdMaxNode = false;
 
         return StatusType::SUCCESS;
     }
@@ -707,497 +867,7 @@ public:
 
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-StatusType treeToArray()
+StatusType treeToArray();
 
 
 

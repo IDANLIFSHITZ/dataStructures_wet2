@@ -13,7 +13,6 @@
 class Team {
 private:
     int id;
-
     LinkedList* playersList;
     AVL<Player*, Pair<int,int>>* playersTree;
     int numOfPlayers;
