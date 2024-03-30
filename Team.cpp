@@ -171,3 +171,18 @@ StatusType mergeArrays(Player** arr1, int size1, Player** arr2, int size2, Playe
     }
     return StatusType::SUCCESS;
 }
+
+output_t<int> Team::getStrength() const
+{
+    if (numOfPlayers == 0)
+    {
+        return output_t<int>(StatusType::FAILURE);
+    }
+    output_t<Player*> out = playersTree->getMedian();
+    if (out.status() != StatusType::SUCCESS)
+    {
+        return output_t<int>(StatusType::FAILURE);
+    }
+    Player* medianPlayer = out.ans();
+    return output_t<int>(medianPlayer->getStrength());
+}

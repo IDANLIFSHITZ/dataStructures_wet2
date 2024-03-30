@@ -57,11 +57,16 @@ StatusType olympics_t::remove_team(int teamId)
         return StatusType::INVALID_INPUT;
     }
 
+    // find the team to delete
+    output_t<Team*> out = teamsTable->find(teamId);
+
     // team is not in the table, cannot remove it
-    if (teamsTable->find(teamId).status() != StatusType::SUCCESS)
+    if (out.status() != StatusType::SUCCESS)
     {
         return StatusType::FAILURE;
     }
+
+    Team* teamToDelete = out.ans();
 
     // remove the team from the table
     StatusType status = teamsTable->remove(teamId);
@@ -76,6 +81,9 @@ StatusType olympics_t::remove_team(int teamId)
     {
         return status;
     }
+
+    // free the players of the team
+    delete teamToDelete;
 
     numOfTeams--;
 
@@ -112,7 +120,7 @@ StatusType olympics_t::add_player(int teamId, int playerStrength)
 
 StatusType olympics_t::remove_newest_player(int teamId)
 {
-	    // invalid input
+    // invalid input
     if (teamId <= 0)
     {
         return StatusType::INVALID_INPUT;
@@ -139,13 +147,46 @@ StatusType olympics_t::remove_newest_player(int teamId)
 
 output_t<int> olympics_t::play_match(int teamId1, int teamId2)
 {
-    // TODO: Your code goes here
-    return 2008;
+    if (teamId1 <= 0 || teamId2 <= 0 || teamId1 == teamId2)
+    {
+        return StatusType::INVALID_INPUT;
+    }
+    output_t<Team*> outTeam1 = teamsTable->find(teamId1);
+    output_t<Team*> outTeam2 = teamsTable->find(teamId2);
+    if (outTeam1.status() != StatusType::SUCCESS || outTeam2.status() != StatusType::SUCCESS)
+    {
+        return StatusType::FAILURE;
+    }
+    Team* team1 = outTeam1.ans();
+    Team* team2 = outTeam2.ans();
+    if (team1->getNumOfPlayers() == 0 || team2->getNumOfPlayers() == 0)
+    {
+        return StatusType::FAILURE;
+    }
+    int team1Strength = team1->getStrength().ans() * team1->getNumOfPlayers();
+    int team2Strength = team2->getStrength().ans() * team2->getNumOfPlayers();
+
+    if (team1Strength > team2Strength)
+    {
+        // TODO: increase win count for team1
+        return teamId1;
+    }
+    else if (team1Strength < team2Strength)
+    {
+        // TODO: increase win count for team2
+        return teamId2;
+    }
+    else
+    {
+        int idOfTeamWithLowerId = team1->getId() > team2->getId() ? teamId2 : teamId1;
+        // TODO: increase win count for idOfTeamWithLowerId
+        return idOfTeamWithLowerId;
+    }
 }
 
 output_t<int> olympics_t::num_wins_for_team(int teamId)
 {
-    // TODO: Your code goes here
+
     static int i = 0;
     return (i++==0) ? 11 : 2;
 }
@@ -158,7 +199,38 @@ output_t<int> olympics_t::get_highest_ranked_team()
 
 StatusType olympics_t::unite_teams(int teamId1, int teamId2)
 {
-	// TODO: Your code goes here
+    // invalid input
+    if (teamId1 <= 0 || teamId2 <= 0 || teamId1 == teamId2)
+    {
+        return StatusType::INVALID_INPUT;
+    }
+    output_t<Team*> outTeam1 = teamsTable->find(teamId1);
+    if (outTeam1.status() != StatusType::SUCCESS)
+    {
+        return StatusType::FAILURE;
+    }
+
+    output_t<Team*> outTeam2 = teamsTable->find(teamId2);
+    if (outTeam2.status() != StatusType::SUCCESS)
+    {
+        return StatusType::FAILURE;
+    }
+    Team* team1 = outTeam1.ans();
+    Team* team2 = outTeam2.ans();
+
+    team1->uniteTeams(team2);
+    StatusType status =  teamsTable->remove(teamId2);
+    if (status != StatusType::SUCCESS)
+    {
+        return status;
+    }
+    status = teamsTree->remove(teamId2);
+    if (status != StatusType::SUCCESS)
+    {
+        return status;
+    }
+    numOfTeams--;
+
     return StatusType::SUCCESS;
 }
 
