@@ -1183,6 +1183,26 @@ public:
 
 
 
+template<class valT, class keyT>
+StatusType AVL<valT,keyT>::findRank(int rank);
+
+
+statusType
+template<class valT, class keyT>
+StatusType AVL<valT,keyT>::findRank(int rank)
+{
+    if (rank < 0 || rank > this->numOfNodes)
+    {
+        return StatusType::FAILURE;
+    }
+    return this->findRankAux(rank, this->root);
+}
+
+StatusType findMedian(){
+    // do it ususing the AVL rank, and the AVL size
+    // if the size is odd, return the median
+
+}
 
 
 
@@ -1190,14 +1210,6 @@ public:
 
 
 
-
-
-
-
-
-
-
-StatusType treeToArray()
 
 
 
