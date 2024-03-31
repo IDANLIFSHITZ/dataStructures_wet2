@@ -219,7 +219,7 @@ output_t<int> Team::getStrength() const
     {
         return output_t<int>(StatusType::FAILURE);
     }
-    output_t<Player*> out = playersTree->getMedian();
+    output_t<Player*> out = playersTree->get_median();
     if (out.status() != StatusType::SUCCESS)
     {
         return output_t<int>(StatusType::FAILURE);

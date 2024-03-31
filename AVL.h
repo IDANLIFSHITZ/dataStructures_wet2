@@ -16,9 +16,6 @@ private:
     class alreadyInTree : public std::exception {
     };
 
-    class notInTree : public std::exception {
-    };
-
     class Node {
     public:
         /*
@@ -111,7 +108,7 @@ private:
         {
             if (node != nullptr)
             {
-                node->subtreeSize = get_subtreeSize(node->left) + get_subtreeSize(node->right) + 1;
+                node->subtreeSize = Node::get_subtreeSize(node->left) + Node::get_subtreeSize(node->right) + 1;
             }
         }
 
@@ -137,15 +134,15 @@ private:
     */
     void update_maxSubtreeRank(Node* node)
     {
-        int currRank = this->calc_power(node->data) ;
+        int currRank = this->calc_power(node->data);
         int maxRankLeft = (node->left != nullptr) ? // get left maxSubtreeRank.
                           node->left->maxSubtreeRank : 0;
         int maxRankRight = (node->right != nullptr) ? // get right maxSubtreeRank.
                            node->right->maxSubtreeRank : 0;
 
         node->maxSubtreeRank = AVL::max(currRank, AVL::max(maxRankLeft, maxRankRight)); //calc maxSubtreeRank.
-        node->maxSubtreeRank += (node->maxSubtreeRank != 0)
-                                   ? node->extra : 0;
+        node->maxSubtreeRank += (node->maxSubtreeRank != 0) ?
+                                node->extra : 0;
     }
 
     /*
@@ -409,6 +406,7 @@ private:
             currNode->left = insert_aux(currNode->left, newNode);
             if (currNode->left != nullptr) //update new left child parent.
             {
+
                 currNode->left->parent = currNode;
             }
         }
@@ -417,6 +415,7 @@ private:
             currNode->right = insert_aux(currNode->right, newNode);
             if (currNode->right != nullptr) //update new right child parent.
             {
+
                 currNode->right->parent = currNode;
             }
         }
@@ -432,7 +431,6 @@ private:
         this->update_maxSubtreeRank(currNode);
 
         /* part 3: calc balance factor and perform rotations if tree  is unbalanced */
-
         return this->balance(currNode);
     }
 
@@ -461,7 +459,7 @@ private:
     }
 
     /*
-     * removes node from tree.
+     * dislodges node from tree.
      * assumes node doesn't have 2 children.
      */
     void remove_node(Node* nodeToRemove)
@@ -469,9 +467,9 @@ private:
         Node* childNode = (nodeToRemove->left != nullptr) ?
                           nodeToRemove->left : nodeToRemove->right;
         Node* parentNode = nodeToRemove->parent;
-        if (this->root == nodeToRemove) //if nodeToRemove is root of tree.
+        if (parentNode == nullptr) //if nodeToRemove is root of tree.
         {
-            this->root = childNode;
+            this->root = childNode; //update root.
         }
         else if(parentNode->left == nodeToRemove) //if nodeToRemove is left child.
         {
@@ -741,7 +739,7 @@ public:
      */
     valT search(keyT key) const {
         Node *nodeToFind = search_aux(this->root, key);
-        return nodeToFind != nullptr ? nodeToFind->data
+        return nodeToFind != nullptr ? nodeToFind->dataZ
                                      : nullptr; //if nodeToFind is not nullptr returns nodeToFind->data, else returns nullptr.
     }
 
@@ -773,7 +771,9 @@ public:
                     this->maxNode = newNode;
                 }
             }
+
             this->numOfNodes++;
+            return StatusType::SUCCESS;
         }
         catch (std::bad_alloc& err) //allocation of new node failed.
         {
@@ -783,8 +783,6 @@ public:
         {
             return StatusType::FAILURE;
         }
-
-        return StatusType::SUCCESS;
     }
 
     /*
@@ -797,9 +795,9 @@ public:
     StatusType remove(keyT key)
     {
         int extra = 0;
-        Node* nodeToRemove = search_extra_aux(this->root, key, extra);
+        Node* nodeToRemove = search_extra_aux(this->root, key, extra); //find node to remove in tree.
 
-        if (nodeToRemove == nullptr)
+        if (nodeToRemove == nullptr) //if there is no node with key=key in tree.
         {
             return StatusType::FAILURE;
         }
@@ -1006,9 +1004,9 @@ public:
     /*
      * returns subtree size of node with key=key
      */
-    int get_subtreeSize(keyT keyToSearch) const
+    int get_num_of_smaller_nodes(keyT keyToSearch) const
     {
-        int subtreeSize = 0;
+        int numOfSmaller = 0;
         Node* currNode = this->root;
 
         while (currNode != nullptr)
@@ -1017,19 +1015,19 @@ public:
             {
                 currNode = currNode->left;
             }
-            else if (currNode->key < keyToSearch)
-            {
-                int leftSubtreeSize = (currNode->left != nullptr) ?
-                                      currNode->left->subtreeSize : 0;
-                subtreeSize += leftSubtreeSize + 1;
-                currNode = currNode->right;
-            }
             else
             {
                 int leftSubtreeSize = (currNode->left != nullptr) ?
                                       currNode->left->subtreeSize : 0;
-                subtreeSize += leftSubtreeSize + 1;
-                return  subtreeSize;
+                numOfSmaller += leftSubtreeSize + 1;
+                if (currNode->key < keyToSearch)
+                {
+                    currNode = currNode->right;
+                }
+                else
+                {
+                    return  numOfSmaller;
+                }
             }
         }
         return 0;
@@ -1038,31 +1036,31 @@ public:
     /*
      * searches node in tree with subtreeSize=subtreeSize and returns its data.
      */
-    output_t<valT> search_subtreeSize(int subtreeSize) const
+    output_t<valT> search_number_of_smaller_nodes(int numOfSmaller) const
     {
-        if (subtreeSize <= 0 || subtreeSize > this->numOfNodes)
+        if (numOfSmaller <= 0 || numOfSmaller > this->numOfNodes)
         {
             return output_t<valT>(StatusType::FAILURE);
         }
         Node* currNode = this->root;
 
-        int currSubtreeSize = (currNode->left != nullptr) ?
+        int currNumOfSmallerSize = (currNode->left != nullptr) ?
                               currNode->left->subtreeSize+1 : 1;
         while (currNode != nullptr)
         {
-            if (currSubtreeSize < subtreeSize)
+            if (currNumOfSmallerSize < numOfSmaller)
             {
                 int add = (currNode->right->left != nullptr) ?
                           currNode->right->left->subtreeSize + 1 : 1;
                 currNode = currNode->right;
-                currSubtreeSize += add;
+                currNumOfSmallerSize += add;
             }
-            else if (currSubtreeSize > subtreeSize)
+            else if (currNumOfSmallerSize > numOfSmaller)
             {
                 int subtract = (currNode->left->right != nullptr) ?
                           currNode->left->right->subtreeSize + 1 : 1;
                 currNode = currNode->left;
-                currSubtreeSize -= subtract;
+                currNumOfSmallerSize -= subtract;
             }
             else
             {
@@ -1081,6 +1079,14 @@ public:
     }
 
     /*
+     * returns value if median key.
+     */
+    valT get_median()
+    {
+        return this->search_subtreeSize((this->numOfNodes/2) + 1);
+    }
+
+    /*
      * transfers node with key=keyToTransfer from other tree to this tree.
      * returns status of transfer.
      */
@@ -1093,6 +1099,23 @@ public:
         return this->insert(dataToTransfer, keyToTransfer);
     }
 
+    /*
+     * returns number of smaller teams of min node with power=
+     */
+    int get_number_of_smaller_teams_by_power_min(int forceToSearch) const
+    {
+        Node* currNode = this->root;
+
+
+    }
+
+    /*
+     * returns number of smaller teams of max node with power=
+     */
+    int get_subtreeSize_by_power_max() const
+    {
+
+    }
 };
 
 

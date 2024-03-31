@@ -199,14 +199,13 @@ output_t<Team*> hashTable::find(int key)
         return output_t<Team*>( StatusType::FAILURE);
     }
 
-
     int index = hashFunction(key, maxSize);
     if (table[index] == nullptr)
     {
         return output_t<Team*>( StatusType::FAILURE);
     }
 
-    return table[index]->search(key);
+    return output_t<Team*>(table[index]->search(key));
 }
 
 int hashTable::getSize() const

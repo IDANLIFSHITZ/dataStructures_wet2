@@ -220,7 +220,7 @@ output_t<int> olympics_t::num_wins_for_team(int teamId)
     {
         return team.status();
     }
-    return this->teamsTree->calc_extra_in_path(team.ans()->getId());
+    return this->teamsTree->calc_extra_in_path(Pair<int,int>(team.ans()->getStrength().ans(), team.ans()->getId()));
 }
 
 output_t<int> olympics_t::get_highest_ranked_team()
@@ -263,7 +263,7 @@ StatusType olympics_t::unite_teams(int teamId1, int teamId2)
     {
         return status;
     }
-    status = teamsTree->remove(teamId2);
+    status = teamsTree->remove(Pair<int,int>(team2->getStrength().ans(), teamId2));
     if (status != StatusType::SUCCESS)
     {
         return status;
@@ -273,9 +273,30 @@ StatusType olympics_t::unite_teams(int teamId1, int teamId2)
     return StatusType::SUCCESS;
 }
 
+bool isPowerOf2(int x)
+{
+    if (x <= 1)
+    {
+        return false;
+    }
+    while (x != 1)
+    {
+        if (x % 2 != 0)
+        {
+            return false;
+        }
+        x = x/2;
+    }
+}
+
 output_t<int> olympics_t::play_tournament(int lowPower, int highPower)
 {
-    // TODO: Your code goes here
-    static int i = 0;
-    return (i++==0) ? 11 : 2;
+    if (lowPower <= 0 || highPower <= 0 || highPower <= lowPower)
+    {
+        return StatusType::INVALID_INPUT;
+    }
+
+    int round = 0;
+
+    return StatusType::SUCCESS;
 }
