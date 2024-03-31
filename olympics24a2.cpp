@@ -1,6 +1,26 @@
 #include "olympics24a2.h"
+#include "Pair.h"
 
-olympics_t::olympics_t(): teamsTable(new hashTable()), teamsTree(new AVL<Team*, int>()), numOfTeams(0)
+/*
+ * private functions:
+ */
+
+void olympics_t::increase_win(Team* team, int change)
+{
+    this->teamsTree->update_extra(Pair<int,int>(team->getStrength().ans(), team->getId()), change);
+    int teamRank = this->teamsTree->get_subtreeSize(Pair<int,int>(team->getStrength().ans(), team->getId()));
+    auto selectRank = this->teamsTree->search_subtreeSize(teamRank-1);
+    if (selectRank.status() == StatusType::SUCCESS)
+    {
+        this->teamsTree->update_extra(Pair<int,int>(selectRank.ans()->getStrength().ans(), selectRank.ans()->getId()), -change);
+    }
+}
+
+/*
+ * public functions:
+ */
+
+olympics_t::olympics_t(): teamsTable(new hashTable()), teamsTree(new AVL<Team*, Pair<int,int>>()), numOfTeams(0)
 {
 
 }
@@ -186,15 +206,30 @@ output_t<int> olympics_t::play_match(int teamId1, int teamId2)
 
 output_t<int> olympics_t::num_wins_for_team(int teamId)
 {
+    if (teamId <= 0)
+    {
+        return StatusType::INVALID_INPUT;
+    }
 
-    static int i = 0;
-    return (i++==0) ? 11 : 2;
+    auto team = this->teamsTable->find(teamId);
+    if (team.status() != StatusType::SUCCESS)
+    {
+        return team.status();
+    }
+    return this->teamsTree->calc_extra_in_path(Pair<int,int>(team.ans()->getStrength().ans(), team.ans()->getId()));
 }
 
 output_t<int> olympics_t::get_highest_ranked_team()
 {
-	// TODO: Your code goes here
-    return 42;
+	if (this->teamsTable->isEmpty())
+    {
+        return -1;
+    }
+    if (this->teamsTree->get_size() == 0)
+    {
+        return 0;
+    }
+    return output_t<int>(this->teamsTree->get_maxSubtreeRank());
 }
 
 StatusType olympics_t::unite_teams(int teamId1, int teamId2)

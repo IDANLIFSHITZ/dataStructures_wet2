@@ -144,8 +144,8 @@ private:
         int maxRankRight = (node->right != nullptr) ? // get right maxSubtreeRank.
                            node->right->maxSubtreeRank : 0;
 
-        node->maxScoreInSubTree = AVL::max(currRank, AVL::max(maxRankLeft, maxRankRight)); //calc maxSubtreeRank.
-        node->maxScoreInSubTree += (node->maxScoreInSubTree != 0)
+        node->maxSubtreeRank = AVL::max(currRank, AVL::max(maxRankLeft, maxRankRight)); //calc maxSubtreeRank.
+        node->maxSubtreeRank += (node->maxSubtreeRank != 0)
                                    ? node->extra : 0;
     }
 
@@ -331,22 +331,61 @@ private:
     }
 
     /*
+     * returns extra of path from root to node with key=key.
+     */
+    int get_extra_from_path(keyT keyToSearch)
+    {
+        int extra = 0;
+        Node* currNode = this->root;
+        while (currNode != nullptr)
+        {
+            extra += currNode->extra;
+            if (currNode->key > keyToSearch) //if belongs in left subtree.
+            {
+                currNode = currNode->left;
+            }
+            else if (currNode->key < keyToSearch) //if belongs in left subtree.
+            {
+                currNode = currNode->right;
+            }
+            else
+            {
+                return extra;
+            }
+        }
+        return 0;
+    }
+
+    /*
     * returns Node with key=key if exists, else return nullptr.
     */
-    Node *search_aux(Node *currNode, const keyT& key) const {
-        if (currNode == nullptr) //if in empty leaf.
+    Node* search_extra_aux(Node *currNode, const keyT& key, int& extra) const {
+        while (currNode != nullptr) //if in empty leaf.
         {
-            return nullptr;
+            extra += currNode->extra;
+            if (currNode->key > key) //if key is in left subtree.
+            {
+               currNode = currNode->left;
+            }
+            else if (currNode->key < key) //if key is in right subtree.
+            {
+                currNode = currNode->right;
+            }
+            else //currNode is the node to find.
+            {
+                return currNode;
+            }
         }
-        else if (currNode->key > key) //if key is in left subtree.
-        {
-            return search_aux(currNode->left, key);
-        }
-        else if (currNode->key < key) //if key is in right subtree.
-        {
-            return search_aux(currNode->right, key);
-        }
-        return currNode; //currNode is the node to find.
+        return nullptr;
+    }
+
+    /*
+    * returns Node with key=key if exists, else return nullptr.
+    */
+    Node* search_aux(Node *currNode, const keyT& key) const
+    {
+        int dm = 0;
+        return search_extra_aux(currNode, key, dm); //currNode is the node to find.
     }
 
     /*
@@ -423,105 +462,55 @@ private:
     }
 
     /*
-    * removes a node from the tree recursively.
-    * returns the node that in supposed to be the current node in the recursion after deletion and rotations.
-    */
-    Node *remove_aux(Node *currNode, keyT keyToDelete) {
-        /* part 1: find and delete the node to be deleted */
-
-        if (currNode == nullptr) //if arrived at leaf and key not found.
+     * removes node from tree.
+     * assumes node doesn't have 2 children.
+     */
+    void remove_node(Node* nodeToRemove)
+    {
+        Node* childNode = (nodeToRemove->left != nullptr) ?
+                          nodeToRemove->left : nodeToRemove->right;
+        Node* parentNode = nodeToRemove->parent;
+        if (this->root == nodeToRemove) //if nodeToRemove is root of tree.
         {
-            throw notInTree();
+            this->root = childNode;
+        }
+        else if(parentNode->left == nodeToRemove) //if nodeToRemove is left child.
+        {
+            parentNode->left = childNode;
+        }
+        else //else nodeToRemove is right child.
+        {
+            parentNode->right = childNode;
         }
 
-        if (currNode->key > keyToDelete) //if key is in left subtree.
+        if (childNode != nullptr) //if nodeToRemove had child.
         {
-            currNode->left = remove_aux(currNode->left, keyToDelete);
+            childNode->parent = parentNode;
+            childNode->extra += nodeToRemove->extra;
+            this->update_maxSubtreeRank(childNode);
         }
-
-        else if (currNode->key < keyToDelete) //if key is in right subtree.
-        {
-            currNode->right = remove_aux(currNode->right, keyToDelete);
-        }
-        else //the current node is the node to be deleted;
-        {
-            if (currNode->right == nullptr ||
-                currNode->left == nullptr) //if current node has only one child or no children.
-            {
-                Node *temp = currNode->left ? currNode->left
-                                            : currNode->right; //if has left child: temp = left child, else temp = right child.
-                temp->parent = currNode->parent;
-                currNode->parent = nullptr;
-                currNode->left = nullptr;
-                currNode->right = nullptr;
-                delete currNode; // deletes old node.
-
-                currNode = temp; //currNode = son if exists, if not nullptr.
-            }
-            else //currNode has two children.
-            {
-                Node* nextBiggest = get_min_node(currNode->right); //nextBiggest is the smallest node that is bigger then currNode.
-
-                Node* node2Delete = currNode;
-                Node* node2DeleteLeft = currNode->left;
-                Node* node2DeleteRight = currNode->right;
-
-                // update children.
-                node2Delete->right = nextBiggest->right;
-                node2Delete->left = nextBiggest->left; //nextBiggest->left = nullptr (always).
-
-                //update currNode to be next biggest node in subtree.
-                currNode = nextBiggest;
-                currNode->left = node2DeleteLeft;
-                currNode->right = node2DeleteRight;
-
-                if (nextBiggest == nextBiggest->parent) //if next biggest is currNode->right.
-                {
-                    currNode->right = node2Delete;
-                }
-                else //if next biggest is not currNode->right (somewhere in subtree.).
-                {
-                    nextBiggest->parent->left = node2Delete;
-                }
-                currNode->right = remove_aux(currNode->right, keyToDelete);
-            }
-        }
-
-        if (currNode == nullptr)//if the subtree of currNode had only one node.
-        {
-            return currNode;
-        }
-
-        /* part 2: update height */
-
-        currNode->update_height();
-
-        /* part 3: calc balance factor and perform rotations if tree  is unbalanced */
-
-        return this->balance(currNode);
     }
 
     /*
      * adds current node to Array at index and adds subtrees.
      * returns updated index after all insertions.
      */
-    int tree_to_sorted_array(valT* values, keyT* keys, int index, Node* currNode) const {
+    int tree_to_sorted_array_aux(valT* values, keyT* keys, int index, Node* currNode) const {
         if (currNode == nullptr)
         {
             return index;
         }
-        index = tree_to_sorted_array(values, keys, index, currNode->left); //adds left subtree to Array.
+        index = tree_to_sorted_array_aux(values, keys, index, currNode->left); //adds left subtree to Array.
         values[index] = currNode->data;
         values[index++] = currNode->key;
-        index = tree_to_sorted_array(values, keys, index, currNode->right); //adds right subtree to Array.
+        index = tree_to_sorted_array_aux(values, keys, index, currNode->right); //adds right subtree to Array.
         return index;
     }
-
 
     /*
      * builds tree from sorted array, returns root of recursive tree.
      */
-    Node* sorted_array_to_tree(valT* values, keyT* keys, int start, int end)
+    Node* sorted_array_to_tree_aux(valT* values, keyT* keys, int start, int end)
     {
         if (start > end)
         {
@@ -535,7 +524,7 @@ private:
             int leftSubtreeSize = 0, rightSubtreeSize = 0;
 
             //create left child subtree from array.
-            newRoot->left = sorted_array_to_tree(values, keys, start, mid - 1); //create left subtree recursively.
+            newRoot->left = sorted_array_to_tree_aux(values, keys, start, mid - 1); //create left subtree recursively.
             if (newRoot->left != nullptr) //update new left child parent.
             {
                 newRoot->left->parent = newRoot;
@@ -543,7 +532,7 @@ private:
             }
 
             //create right child subtree from array.
-            newRoot->right = sorted_array_to_tree(values, keys, mid + 1, end); //create right subtree recursively.
+            newRoot->right = sorted_array_to_tree_aux(values, keys, mid + 1, end); //create right subtree recursively.
             if (newRoot->right != nullptr) //update new right child parent.
             {
                 newRoot->right->parent = newRoot;
@@ -680,11 +669,28 @@ public:
     AVL<valT, keyT>(valT* values, keyT* keys, int size) : numOfNodes(size),
                                                           calc_power([](const valT&)->int{return 0;})
     {
-        this->root = sorted_array_to_tree(values, keys, 0, this->numOfNodes-1); //builds tree from sorted array.
+        this->root = this->sorted_array_to_tree_aux(values, keys, 0, this->numOfNodes-1); //builds tree from sorted array.
 
         //get min and max nodes from built tree.
-        this->minNode = this->get_min_node();
-        this->maxNode = this->get_max_node();
+        this->minNode = this->get_min_node(this->root);
+        this->maxNode = this->get_max_node(this->root);
+    }
+
+    /*
+     * copy constructor for tree. hard copies other into this.
+     */
+    AVL& operator=(const AVL<valT, keyT>& other)
+    {
+        if (this == &other)
+        {
+            return *this;
+        }
+        this->numOfNodes = other.numOfNodes;
+        this->root = this->hard_copy(other.root, nullptr);
+        this->minNode = this->get_min_node(this->root);
+        this->maxNode = this->get_max_node(this->root);
+
+        return *this;
     }
 
     /*
@@ -747,7 +753,8 @@ public:
      *         FAILURE- the node is already in the tree.
      * time complexity of O(log(tree.nunOfNodes)).
      */
-    StatusType insert(valT data, keyT key) {
+    StatusType insert(valT data, keyT key)
+    {
         try {
             Node *newNode = new Node(data, key); //create new node.
             this->root = insert_aux(this->root, newNode); //insert node to tree.
@@ -790,33 +797,77 @@ public:
      */
     StatusType remove(keyT key)
     {
-        try {
-            this->root = remove_aux(this->root, key);
-            this->numOfNodes--;
+        int extra = 0;
+        Node* nodeToRemove = search_extra_aux(this->root, key, extra);
 
-            if (this->numOfNodes == 0)
-            {
-                this->minNode = nullptr;
-                this->maxNode   = nullptr;
-            }
-            else if (this->numOfNodes == 1)
-            {
-                this->minNode = this->root;
-                this->maxNode   = this->root;
-            }
-            else // general case.
-            {
-                this->minNode = this->get_min_node();
-                this->maxNode = this->get_max_node();
-            }
-        }
-        catch (std::bad_alloc& err)
-        {
-            return StatusType::ALLOCATION_ERROR;
-        }
-        catch (notInTree& err)
+        if (nodeToRemove == nullptr)
         {
             return StatusType::FAILURE;
+        }
+
+        if (nodeToRemove->left == nullptr || nodeToRemove->right == nullptr) //if doesn't have two children.
+        {
+            this->remove_node(nodeToRemove);
+            Node* deleteNode = nodeToRemove;
+            nodeToRemove = nodeToRemove->parent;
+
+            //delete deleteNode.
+            deleteNode->left = nullptr;
+            deleteNode->right = nullptr;
+            extra -= deleteNode->extra;
+            delete deleteNode;
+        }
+        else //has both children.
+        {
+            Node* nextBiggest = this->get_min_node(nodeToRemove->right); //get next biggest node in tree.
+            int extraRightChild = (nodeToRemove->right != nullptr) ?
+                                  nodeToRemove->right->extra : 0;
+            int nextBiggestExtra = this->get_extra_from_path(nextBiggest);
+
+            nodeToRemove->key = nextBiggest->key;
+            nodeToRemove->data = nextBiggest->data;
+            nodeToRemove->extra += nextBiggestExtra - extra;
+
+            if (nodeToRemove->left != nullptr)
+            {
+                nodeToRemove->left->extra -= nextBiggestExtra - extra;
+                this->update_maxSubtreeRank(nodeToRemove->left);
+            }
+            if (nodeToRemove->right != nullptr)
+            {
+                nodeToRemove->right->extra -= nextBiggestExtra - extra;
+                this->update_maxSubtreeRank(nodeToRemove->right);
+            }
+
+            this->remove_node(nextBiggest);
+            nodeToRemove = nextBiggest->parent;
+            nextBiggest->left = nullptr;
+            nextBiggest->right = nullptr;
+            extra = nextBiggestExtra;
+
+            delete nextBiggest;
+        }
+
+        // climb up the tree to the root and update and balance.
+        while (nodeToRemove != nullptr)
+        {
+            Node::update_node_height(nodeToRemove);
+            Node::update_subtreeSize(nodeToRemove);
+            this->update_maxSubtreeRank(nodeToRemove);
+            this->balance(nodeToRemove);
+
+            nodeToRemove = nodeToRemove->parent;
+        }
+
+        this->numOfNodes--;
+        if (numOfNodes == 0)
+        {
+            this->root = nullptr;
+        }
+        else
+        {
+            this->minNode = this->get_min_node(this->root);
+            this->maxNode = this->get_max_node(this->root);
         }
 
         return StatusType::SUCCESS;
@@ -826,30 +877,208 @@ public:
      * converts tree to Array and returns the Array.
      * time complexity of O(tree.numOfNodes).
      */
-    /*
-    SortedArray<Pair<keyT, valT>>* convert_to_sorted_array() const {
-        SortedArray<Pair<keyT, valT>>* array = new SortedArray<Pair<keyT, valT>>(this->numOfNodes);
-        tree_to_sorted_array(array->get_sorted_array(), 0, this->root);//creates the Array from the tree recursively.
-        return array;
-    }
-     */
-
-    /*
-     * returns valT of maxNode.
-     * time complexity of O(1).
-     */
-    valT get_max_node_val() const
+    void tree_to_sorted_array(valT* values, keyT* keys)
     {
-        return (this->maxNode != nullptr) ? this->maxNode->data : NULL;
+        tree_to_sorted_array_aux(values, keys, 0, this->root); //creates the Array from the tree recursively.
     }
 
     /*
-     * returns valT of minNode.
-     * time complexity of O(1).
+     * updates extra field in node with key=keyToFind
+     * and conserves integrity of tree.
      */
-    valT get_min_node_val() const
+    void update_extra(keyT keyToFind, int change)
     {
-        return (this->minNode != nullptr) ? this->minNode->data : NULL;
+        int pathExtra = 0;
+        keyT prevBiggestKey;
+        Node* currNode = this->root;
+        Node* lastRightTurn = nullptr;
+
+        while(currNode != nullptr && currNode->key != keyToFind)
+        {
+            pathExtra += currNode->extra;
+            if (currNode->key > keyToFind) //if keyToFind belongs in left subtree.
+            {
+                if (currNode->left == nullptr)
+                {
+                    if (lastRightTurn == nullptr)
+                    {
+                        return;
+                    }
+                    prevBiggestKey = lastRightTurn->key;
+                }
+                currNode = currNode->left;
+            }
+            else
+            {
+                if (currNode->right == nullptr)
+                {
+                    if (lastRightTurn == nullptr)
+                    {
+                        return;
+                    }
+                    prevBiggestKey = lastRightTurn->key;
+                }
+                currNode = currNode->right;
+            }
+        }
+
+        if (currNode != nullptr) //if node in tree.
+        {
+            prevBiggestKey = currNode->key;
+            pathExtra += currNode->extra;
+        }
+
+        bool isLastTurnLeft = true;
+        currNode = root;
+        while (currNode != nullptr && currNode->key != prevBiggestKey)
+        {
+            if (currNode->key > prevBiggestKey)
+            {
+                if (!isLastTurnLeft)
+                {
+                    currNode->extra -= change;
+                    pathExtra -= change;
+                    isLastTurnLeft = true;
+                }
+                currNode = currNode->left;
+            }
+            else
+            {
+                if (isLastTurnLeft)
+                {
+                    currNode->extra += change;
+                    pathExtra += change;
+                    isLastTurnLeft = false;
+                }
+                currNode = currNode->right;
+            }
+        }
+
+        if (currNode->key == prevBiggestKey)
+        {
+            if (isLastTurnLeft) {
+                currNode->extra += change;
+                pathExtra += change;
+
+            }
+            if (currNode->right != nullptr)
+            {
+                currNode->right->extra -= change;
+                currNode = currNode->right;
+            }
+            pathExtra += currNode->extra;
+        }
+
+        while (currNode != nullptr)
+        {
+            this->update_maxSubtreeRank(currNode);
+            pathExtra -= currNode->extra;
+            currNode = currNode->parent;
+        }
+    }
+
+    /*
+     * returns sum of extras on path to node with key=key.
+     */
+    int calc_extra_in_path(keyT key)
+    {
+        int extraSum = 0;
+        Node* currNode = this->root;
+
+        while (currNode != nullptr)
+        {
+            extraSum += currNode->extra;
+            if (currNode->key > key)
+            {
+                currNode = currNode->left;
+            }
+            else if (currNode->key < key)
+            {
+                currNode = currNode->right;
+            }
+            else
+            {
+                return extraSum;
+            }
+        }
+        return 0;
+    }
+
+    /*
+     * returns subtree size of node with key=key
+     */
+    int get_subtreeSize(keyT keyToSearch) const
+    {
+        int subtreeSize = 0;
+        Node* currNode = this->root;
+
+        while (currNode != nullptr)
+        {
+            if (currNode->key > keyToSearch)
+            {
+                currNode = currNode->left;
+            }
+            else if (currNode->key < keyToSearch)
+            {
+                int leftSubtreeSize = (currNode->left != nullptr) ?
+                                      currNode->left->subtreeSize : 0;
+                subtreeSize += leftSubtreeSize + 1;
+                currNode = currNode->right;
+            }
+            else
+            {
+                int leftSubtreeSize = (currNode->left != nullptr) ?
+                                      currNode->left->subtreeSize : 0;
+                subtreeSize += leftSubtreeSize + 1;
+                return  subtreeSize;
+            }
+        }
+        return 0;
+    }
+
+    /*
+     * searches node in tree with subtreeSize=subtreeSize and returns its data.
+     */
+    output_t<valT> search_subtreeSize(int subtreeSize) const
+    {
+        if (subtreeSize <= 0 || subtreeSize > this->numOfNodes)
+        {
+            return output_t<valT>(StatusType::FAILURE);
+        }
+        Node* currNode = this->root;
+
+        int currSubtreeSize = (currNode->left != nullptr) ?
+                              currNode->left->subtreeSize+1 : 1;
+        while (currNode != nullptr)
+        {
+            if (currSubtreeSize < subtreeSize)
+            {
+                int add = (currNode->right->left != nullptr) ?
+                          currNode->right->left->subtreeSize + 1 : 1;
+                currNode = currNode->right;
+                currSubtreeSize += add;
+            }
+            else if (currSubtreeSize > subtreeSize)
+            {
+                int subtract = (currNode->left->right != nullptr) ?
+                          currNode->left->right->subtreeSize + 1 : 1;
+                currNode = currNode->left;
+                currSubtreeSize -= subtract;
+            }
+            else
+            {
+                return currNode->data;
+            }
+        }
+        return output_t<valT>(StatusType::FAILURE);
+    }
+
+    /*
+     * returns maxSubtreeRank in tree.
+     */
+    int get_maxSubtreeRank()
+    {
+        return (this->root != nullptr) ? this->root->maxSubtreeRank : 0;
     }
 
     /*
@@ -866,9 +1095,6 @@ public:
     }
 
 };
-
-StatusType treeToArray();
-
 
 
 

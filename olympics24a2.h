@@ -23,8 +23,10 @@
 class olympics_t {
 private:
 	hashTable* teamsTable;
-    AVL<Team*, int>* teamsTree;
+    AVL<Team*, Pair<int,int>>* teamsTree;
     int numOfTeams;
+
+    void increase_win(Team* team, int change = 1);
 public:
 	// <DO-NOT-MODIFY> {
 
