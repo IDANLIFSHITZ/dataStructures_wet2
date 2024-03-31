@@ -890,10 +890,10 @@ public:
         Node* currNode = this->root;
         Node* lastRightTurn = nullptr;
 
-        while(currNode != nullptr && currNode->key != keyToFind)
+        while(currNode != nullptr)
         {
             pathExtra += currNode->extra;
-            if (currNode->key > keyToFind) //if keyToFind belongs in left subtree.
+            if (currNode->key > keyToFind)  //if keyToFind belongs in left subtree.
             {
                 if (currNode->left == nullptr)
                 {
@@ -905,26 +905,24 @@ public:
                 }
                 currNode = currNode->left;
             }
-            else
+            else if (currNode->key < keyToFind) //if keyToFind belongs in right subtree.
             {
                 if (currNode->right == nullptr)
                 {
-                    if (lastRightTurn == nullptr)
-                    {
-                        return;
-                    }
-                    prevBiggestKey = lastRightTurn->key;
+                    prevBiggestKey = currNode->key;
                 }
+                lastRightTurn = currNode;
                 currNode = currNode->right;
+            }
+            else //if node in tree.
+            {
+                prevBiggestKey = currNode->key;
+                pathExtra += currNode->extra;
+                break;
             }
         }
 
-        if (currNode != nullptr) //if node in tree.
-        {
-            prevBiggestKey = currNode->key;
-            pathExtra += currNode->extra;
-        }
-
+        //update pathExtra.
         bool isLastTurnLeft = true;
         currNode = root;
         while (currNode != nullptr && currNode->key != prevBiggestKey)
@@ -953,10 +951,10 @@ public:
 
         if (currNode->key == prevBiggestKey)
         {
-            if (isLastTurnLeft) {
+            if (isLastTurnLeft)
+            {
                 currNode->extra += change;
                 pathExtra += change;
-
             }
             if (currNode->right != nullptr)
             {
@@ -972,6 +970,15 @@ public:
             pathExtra -= currNode->extra;
             currNode = currNode->parent;
         }
+    }
+
+    /*
+     * updates extra in all nodes in range between low and high keys.
+     */
+    void update_extra_in_range(keyT lowKey, keyT highKet, int change)
+    {
+        this->update_extra(lowKey, -change);
+        this->update_extra(highKet, change);
     }
 
     /*
@@ -1036,6 +1043,7 @@ public:
     /*
      * searches node in tree with subtreeSize=subtreeSize and returns its data.
      */
+
     output_t<valT> search_number_of_smaller_nodes(int numOfSmaller) const
     {
         if (numOfSmaller <= 0 || numOfSmaller > this->numOfNodes)
@@ -1083,7 +1091,7 @@ public:
      */
     valT get_median()
     {
-        return this->search_subtreeSize((this->numOfNodes/2) + 1);
+        return this->search_number_of_smaller_nodes((this->numOfNodes/2) + 1);
     }
 
     /*
@@ -1102,17 +1110,16 @@ public:
     /*
      * returns number of smaller teams of min node with power=
      */
-    int get_number_of_smaller_teams_by_power_min(int forceToSearch) const
+    int get_number_of_smaller_nodes_by_power_min(int forceToSearch) const
     {
         Node* currNode = this->root;
-
 
     }
 
     /*
      * returns number of smaller teams of max node with power=
      */
-    int get_subtreeSize_by_power_max() const
+    int get_number_of_smaller_nodes_by_power_max(int forceToSearch) const
     {
 
     }
