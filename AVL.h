@@ -385,6 +385,43 @@ private:
     }
 
     /*
+     * returns first Node with force=force.
+     */
+    Node* search_by_force(Node* currNode, int force, int& numOfSmaller) const
+    {
+        while (currNode != nullptr) //if in empty leaf.
+        {
+            if (this->calc_power(currNode) > force) //if force is in left subtree.
+            {
+                if (currNode->left == nullptr)
+                {
+                    return  currNode;
+                }
+                currNode = currNode->left;
+            }
+            else
+            {
+                int leftSubtreeSize = (currNode->left != nullptr) ?
+                                      currNode->left->subtreeSize : 0;
+                numOfSmaller += leftSubtreeSize + 1;
+                if (this->calc_power(currNode) < force) //if force is in right subtree.
+                {
+                    if (currNode->right == nullptr)
+                    {
+                        return  currNode;
+                    }
+                    currNode = currNode->right;
+                }
+                else //currNode is the node to find.
+                {
+                    return currNode;
+                }
+            }
+        }
+        return nullptr;
+    }
+
+    /*
      * adds a new node to the tree recursively.
      * returns the node that in supposed to be the current node in the recursion after insertion and rotations.
      */
@@ -632,6 +669,50 @@ private:
         }
     }
 
+    /*
+     * returns number of smaller node from next team with force=force.
+     * min case.
+     */
+    int get_number_of_smaller_nodes_of_next_min_force(Node* currNode, int forceToSearch) const
+    {
+        if (currNode == nullptr)
+        {
+            return 0;
+        }
+
+        int numOfSmaller = 0;
+        currNode = currNode->right;
+        numOfSmaller = (currNode->left != nullptr) ?
+                       currNode->left->subtreeSize+1 : 1;
+        while (currNode != nullptr && this->calc_power(currNode) != forceToSearch)
+        {
+            currNode = currNode->left;
+        }
+        return numOfSmaller + get_number_of_smaller_nodes_of_next_min_force(currNode, forceToSearch);
+    }
+
+    /*
+     * returns number of smaller node from next team with force=force.
+     * max case.
+     */
+    int get_number_of_smaller_nodes_of_next_max_force(Node* currNode, int forceToSearch) const
+    {
+        if (currNode == nullptr)
+        {
+            return 0;
+        }
+
+        int numOfSmaller = 0;
+        currNode = currNode->left;
+        while (currNode != nullptr && this->calc_power(currNode) != forceToSearch)
+        {
+            numOfSmaller += (currNode->left != nullptr) ?
+                            currNode->left->subtreeSize+1 : 1;
+            currNode = currNode->right;
+        }
+        return numOfSmaller + get_number_of_smaller_nodes_of_next_min_force(currNode, forceToSearch);
+    }
+
 public:
     /*
      * public members:
@@ -652,7 +733,7 @@ public:
     /*
      * AVL constructor for team AVL trees.
      */
-    AVL<valT, keyT>(std::function<int(const valT&)> calc_power) : root(nullptr),
+    explicit AVL<valT, keyT>(std::function<int(const valT&)> calc_power) : root(nullptr),
                                                                   numOfNodes(0),
                                                                   minNode(nullptr),
                                                                   maxNode(nullptr),
@@ -1112,8 +1193,9 @@ public:
      */
     int get_number_of_smaller_nodes_by_power_min(int forceToSearch) const
     {
-        Node* currNode = this->root;
-
+        int numOfSmaller = 0;
+        Node* currNode = this->search_by_force(this->root, forceToSearch, numOfSmaller);
+        return  numOfSmaller + this->get_number_of_smaller_nodes_of_next_min_force(currNode, forceToSearch);
     }
 
     /*
@@ -1121,7 +1203,9 @@ public:
      */
     int get_number_of_smaller_nodes_by_power_max(int forceToSearch) const
     {
-
+        int numOfSmaller = 0;
+        Node* currNode = this->search_by_force(this->root, forceToSearch, numOfSmaller);
+        return numOfSmaller + this->get_number_of_smaller_nodes_of_next_max_force(currNode, forceToSearch);
     }
 };
 

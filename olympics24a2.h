@@ -19,6 +19,7 @@
 #include "hashTable.h"
 #include "AVL.h"
 #include "Team.h"
+#include <functional>
 
 class olympics_t {
 private:

@@ -22,9 +22,17 @@ void olympics_t::increase_win(Team* team, int change)
  * public functions:
  */
 
-olympics_t::olympics_t(): teamsTable(new hashTable()), teamsTree(new AVL<Team*, Pair<int,int>>()), numOfTeams(0)
+olympics_t::olympics_t(): teamsTable(new hashTable()),
+                          teamsTree(new AVL<Team*, Pair<int,int>>()),
+                          numOfTeams(0)
 {
-
+    this->teamsTree->calc_power = [](const Team& t)
+    {
+        if (t.getNumOfPlayers() == 0)
+        {
+            return 0;
+        }
+        return t.getStrength().ans();}
 }
 
 olympics_t::~olympics_t()
@@ -300,14 +308,14 @@ output_t<int> olympics_t::play_tournament(int lowPower, int highPower)
     }
     int numOfSmallerLow = this->teamsTree->get_number_of_smaller_nodes_by_power_min(lowPower);
     int numOfSmallerHigh = this->teamsTree->get_number_of_smaller_nodes_by_power_max(highPower);
-
     int numOfTeams = numOfSmallerHigh - numOfSmallerLow;
-    if (!isPowerOf2(numOfTeams))
+
+    if (!isPowerOf2(numOfTeams)) //if number of teams in tournament is not a power of 2.
     {
         return StatusType::FAILURE;
     }
 
-    if (numOfTeams == 1)
+    if (numOfTeams == 1) //if only one team in tournament.
     {
         return this->teamsTree->search_number_of_smaller_nodes(numOfSmallerHigh).ans()->getId();
     }
