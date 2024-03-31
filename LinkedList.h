@@ -2,8 +2,8 @@
 // Created by yuval on 3/27/2024.
 //
 
-#ifndef WET24_TO_PUBLISH_LINKEDLIST_H
-#define WET24_TO_PUBLISH_LINKEDLIST_H
+#ifndef LINKEDLIST_H
+#define LINKEDLIST_H
 
 #include "wet2util.h"
 #include "Player.h"

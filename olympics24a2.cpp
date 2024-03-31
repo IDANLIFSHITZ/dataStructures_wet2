@@ -7,12 +7,13 @@
 
 void olympics_t::increase_win(Team* team, int change)
 {
-    this->teamsTree->update_extra(Pair<int,int>(team->getStrength().ans(), team->getId()), change);
-    int teamRank = this->teamsTree->get_subtreeSize(Pair<int,int>(team->getStrength().ans(), team->getId()));
+    this->teamsTree->update_extra(team->getId(), 1*change);
+    int teamRank = this->teamsTree->get_subtreeSize( team->getId());
     auto selectRank = this->teamsTree->search_subtreeSize(teamRank-1);
     if (selectRank.status() == StatusType::SUCCESS)
     {
-        this->teamsTree->update_extra(Pair<int,int>(selectRank.ans()->getStrength().ans(), selectRank.ans()->getId()), -change);
+
+        this->teamsTree->update_extra(selectRank.ans()->getId(), -1*change);
     }
 }
 
@@ -20,7 +21,7 @@ void olympics_t::increase_win(Team* team, int change)
  * public functions:
  */
 
-olympics_t::olympics_t(): teamsTable(new hashTable()), teamsTree(new AVL<Team*, Pair<int,int>>()), numOfTeams(0)
+olympics_t::olympics_t(): teamsTable(new hashTable()), teamsTree(new AVL<Team*, int>()), numOfTeams(0)
 {
 
 }
@@ -189,17 +190,20 @@ output_t<int> olympics_t::play_match(int teamId1, int teamId2)
     if (team1Strength > team2Strength)
     {
         // TODO: increase win count for team1
+        increase_win(teamsTable->find(teamId1).ans(), 1);
         return teamId1;
     }
     else if (team1Strength < team2Strength)
     {
         // TODO: increase win count for team2
+        increase_win(teamsTable->find(teamId2).ans(), 1);
         return teamId2;
     }
     else
     {
         int idOfTeamWithLowerId = team1->getId() > team2->getId() ? teamId2 : teamId1;
         // TODO: increase win count for idOfTeamWithLowerId
+        increase_win(teamsTable->find(idOfTeamWithLowerId).ans(), 1);
         return idOfTeamWithLowerId;
     }
 }
@@ -216,7 +220,7 @@ output_t<int> olympics_t::num_wins_for_team(int teamId)
     {
         return team.status();
     }
-    return this->teamsTree->calc_extra_in_path(Pair<int,int>(team.ans()->getStrength().ans(), team.ans()->getId()));
+    return this->teamsTree->calc_extra_in_path(team.ans()->getId());
 }
 
 output_t<int> olympics_t::get_highest_ranked_team()

@@ -25,7 +25,7 @@ StatusType Team::addPlayer(int strength)
         numOfPlayers++;
         playersList->push(player);
         Pair<int, int> pair(strength, player->getId());
-        playersTree.insert(player, pair);
+        playersTree->insert(player, pair);
     }
     catch (const std::bad_alloc& e)
     {
@@ -42,7 +42,7 @@ StatusType Team::removeNewestPlayer()
     }
     Pair<int,int> pair(playersList->head->player->getStrength(), playersList->head->player->getId());
     playersList->pop();
-    playersTree.remove(pair);
+    playersTree->remove(pair);
     numOfPlayers--;
     return StatusType::SUCCESS;
 }
@@ -64,39 +64,70 @@ StatusType Team::uniteTeams(Team* other){
     int otherSize = other->playersTree->get_size();
     int unitedSize = mySize + otherSize;
 
-    Pair<Player**, Pair<int,int>*>* myArrays;
-    Pair<Player**, Pair<int,int>*>* otherArrays;
+    Player** myPlayersArray;
+    Player** otherPlayersArray;
+    Pair<int,int>* myKeysArray;
+    Pair<int,int>* otherKeysArray;
+
+    try
+    {
+        myPlayersArray = new Player*[mySize];
+    }
+    catch (const std::bad_alloc& e)
+    {
+        return StatusType::ALLOCATION_ERROR;
+    }
+    try
+    {
+        otherPlayersArray = new Player*[otherSize];
+    }
+    catch (const std::bad_alloc& e)
+    {
+        delete[] myPlayersArray;
+        return StatusType::ALLOCATION_ERROR;
+    }
+    try
+    {
+        myKeysArray = new Pair<int,int>[mySize];
+    }
+    catch (const std::bad_alloc& e)
+    {
+        delete[] myPlayersArray;
+        delete[] otherPlayersArray;
+        return StatusType::ALLOCATION_ERROR;
+    }
+    try
+    {
+        otherKeysArray = new Pair<int,int>[otherSize];
+    }
+    catch (const std::bad_alloc& e)
+    {
+        delete[] myPlayersArray;
+        delete[] otherPlayersArray;
+        delete[] myKeysArray;
+        return StatusType::ALLOCATION_ERROR;
+    }
+
+    Pair<Player**, Pair<int,int>* > myArrays (myPlayersArray, myKeysArray);
+    Pair<Player**, Pair<int,int>* > otherArrays (otherPlayersArray, otherKeysArray);
 
     Player** unitedPlayersArray;
     Pair<int,int>* unitedKeysArray;
 
-    try
-    {
-        otherArrays = other->playersTree->toArray();
-    }
-    catch (const std::bad_alloc& e)
-    {
-        return StatusType::ALLOCATION_ERROR;
-    }
-    try
-    {
-        myArrays = playersTree->toArray();
 
-    }
-    catch (const std::bad_alloc& e)
-    {
-        deleteArraysFromPair(otherArrays);
-        delete myArrays;
-        return StatusType::ALLOCATION_ERROR;
-    }
+    playersTree->tree_to_sorted_array(myArrays.get_first(), myArrays.get_second());
+
+
+    other->playersTree->tree_to_sorted_array(otherArrays.get_first(), otherArrays.get_second());
+
     try
     {
         unitedPlayersArray = new Player*[mySize + otherSize];
     }
     catch (const std::bad_alloc& e)
     {
-        deleteArraysFromPair(otherArrays);
-        deleteArraysFromPair(myArrays);
+        deleteArraysFromPair(&myArrays);
+        deleteArraysFromPair(&otherArrays);
         return StatusType::ALLOCATION_ERROR;
     }
     try
@@ -105,19 +136,29 @@ StatusType Team::uniteTeams(Team* other){
     }
     catch (const std::bad_alloc& e)
     {
-        deleteArraysFromPair(otherArrays);
-        deleteArraysFromPair(myArrays);
+        deleteArraysFromPair(&myArrays);
+        deleteArraysFromPair(&otherArrays);
         delete[] unitedPlayersArray;
         return StatusType::ALLOCATION_ERROR;
     }
 
-    mergeArrays(myArrays->get_first(), mySize, otherArrays->get_first(), otherSize, unitedPlayersArray, unitedKeysArray);
+    mergeArrays(myArrays.get_first(), mySize, otherArrays.get_first(), otherSize, unitedPlayersArray, unitedKeysArray);
 
-    deleteArraysFromPair(myArrays);
-    deleteArraysFromPair(otherArrays);
+    deleteArraysFromPair(&myArrays);
+    deleteArraysFromPair(&otherArrays);
 
     delete playersTree;
-    playersTree = new AVL<Player*, Pair<int,int>>(unitedPlayersArray, unitedKeysArray, unitedSize);
+
+    try
+    {
+        playersTree = new AVL<Player *, Pair<int, int>>(unitedPlayersArray, unitedKeysArray, unitedSize);
+    }
+    catch (const std::bad_alloc& e)
+    {
+        delete[] unitedPlayersArray;
+        delete[] unitedKeysArray;
+        return StatusType::ALLOCATION_ERROR;
+    }
 
     delete other->playersList;
     other->playersList = nullptr;

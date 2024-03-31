@@ -54,13 +54,21 @@ StatusType hashTable::add(Team* value, int key)
         AVL<Team*, int>* pointerToTree;
         try
         {
-            table = new AVL<Team*, int>* [1];
+            table = new AVL<Team *, int> *[1];
+        }
+        catch (const std::bad_alloc& e)
+        {
+            return StatusType::ALLOCATION_ERROR;
+        }
+        try
+        {
             pointerToTree = new AVL<Team*, int>();
             pointerToTree->insert(value, key);
             table[0] = pointerToTree;
-        } catch (const std::bad_alloc& e)
+        }
+        catch (const std::bad_alloc& e)
         {
-            delete pointerToTree;
+            delete[] table;
             return StatusType::ALLOCATION_ERROR;
         }
         maxSize++;
@@ -140,7 +148,7 @@ StatusType hashTable::resize(int newSize)
 {
     if (newSize == 0)
     {
-        delete table;
+        delete[] table;
         table = nullptr;
         maxSize = 0;
         currSize = 0;

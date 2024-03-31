@@ -71,6 +71,11 @@ public:
      * @return the strength of the player
      */
     int getStrength() const;
+
+    /*
+     * operator < for the player
+     */
+    bool operator<(const Player& other) const;
 };
 
 

@@ -50,7 +50,6 @@ private:
         {
             delete this->left;
             delete this->right;
-            return;
         }
 
         /*
@@ -112,7 +111,7 @@ private:
         {
             if (node != nullptr)
             {
-                node->subtreeSize = update_subtreeSize(node->left) + update_subtreeSize(node->right) + 1;
+                node->subtreeSize = get_subtreeSize(node->left) + get_subtreeSize(node->right) + 1;
             }
         }
 
@@ -502,7 +501,7 @@ private:
         }
         index = tree_to_sorted_array_aux(values, keys, index, currNode->left); //adds left subtree to Array.
         values[index] = currNode->data;
-        values[index++] = currNode->key;
+        keys[index++] = currNode->key;
         index = tree_to_sorted_array_aux(values, keys, index, currNode->right); //adds right subtree to Array.
         return index;
     }
@@ -516,7 +515,7 @@ private:
         {
             return nullptr;
         }
-        Node* newRoot = nullptr;
+        Node* newRoot;
         int mid = (start + end) / 2;
         try
         {
@@ -540,7 +539,7 @@ private:
             }
 
             //update newRoot.
-            this->update_node_height(newRoot);
+            Node::update_node_height(newRoot);
             newRoot->subtreeSize = leftSubtreeSize + rightSubtreeSize + 1;
 
             return newRoot;
@@ -609,7 +608,7 @@ private:
             }
 
             //update newCopy.
-            this->update_node_height(newCopy);
+            Node::update_node_height(newCopy);
             newCopy->subtreeSize = leftSubtreeSize + rightSubtreeSize + 1;
 
             return newCopy;
@@ -822,7 +821,7 @@ public:
             Node* nextBiggest = this->get_min_node(nodeToRemove->right); //get next biggest node in tree.
             int extraRightChild = (nodeToRemove->right != nullptr) ?
                                   nodeToRemove->right->extra : 0;
-            int nextBiggestExtra = this->get_extra_from_path(nextBiggest);
+            int nextBiggestExtra = this->get_extra_from_path(nextBiggest->key);
 
             nodeToRemove->key = nextBiggest->key;
             nodeToRemove->data = nextBiggest->data;

@@ -38,7 +38,6 @@ public:
 
     int getId() const;
     int getNumOfPlayers() const;
-    Player* getPlayer(int id) const;
     output_t<int> getStrength() const;
 
     StatusType uniteTeams(Team* other);
