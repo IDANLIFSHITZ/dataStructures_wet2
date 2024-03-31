@@ -391,7 +391,7 @@ private:
     {
         while (currNode != nullptr) //if in empty leaf.
         {
-            if (this->calc_power(currNode) > force) //if force is in left subtree.
+            if (this->calc_power(currNode->data) > force) //if force is in left subtree.
             {
                 if (currNode->left == nullptr)
                 {
@@ -404,7 +404,7 @@ private:
                 int leftSubtreeSize = (currNode->left != nullptr) ?
                                       currNode->left->subtreeSize : 0;
                 numOfSmaller += leftSubtreeSize + 1;
-                if (this->calc_power(currNode) < force) //if force is in right subtree.
+                if (this->calc_power(currNode->data) < force) //if force is in right subtree.
                 {
                     if (currNode->right == nullptr)
                     {
@@ -684,7 +684,7 @@ private:
         currNode = currNode->right;
         numOfSmaller = (currNode->left != nullptr) ?
                        currNode->left->subtreeSize+1 : 1;
-        while (currNode != nullptr && this->calc_power(currNode) != forceToSearch)
+        while (currNode != nullptr && this->calc_power(currNode->data) != forceToSearch)
         {
             currNode = currNode->left;
         }
@@ -704,7 +704,7 @@ private:
 
         int numOfSmaller = 0;
         currNode = currNode->left;
-        while (currNode != nullptr && this->calc_power(currNode) != forceToSearch)
+        while (currNode != nullptr && this->calc_power(currNode->data) != forceToSearch)
         {
             numOfSmaller += (currNode->left != nullptr) ?
                             currNode->left->subtreeSize+1 : 1;

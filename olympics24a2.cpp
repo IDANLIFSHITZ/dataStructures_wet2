@@ -23,16 +23,12 @@ void olympics_t::increase_win(Team* team, int change)
  */
 
 olympics_t::olympics_t(): teamsTable(new hashTable()),
-                          teamsTree(new AVL<Team*, Pair<int,int>>()),
+                          teamsTree(new AVL<Team*, Pair<int,int>>([](const Team* team){if (team->getNumOfPlayers() == 0)
+                                                                      {
+                                                                          return 0;
+                                                                      }return team->getStrength().ans();})),
                           numOfTeams(0)
 {
-    this->teamsTree->calc_power = [](const Team& t)
-    {
-        if (t.getNumOfPlayers() == 0)
-        {
-            return 0;
-        }
-        return t.getStrength().ans();}
 }
 
 olympics_t::~olympics_t()
