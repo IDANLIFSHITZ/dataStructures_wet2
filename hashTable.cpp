@@ -122,7 +122,7 @@ StatusType hashTable::remove(int key)
 //    }
 
 
-    StatusType status = table[index]->remove(key); // TODO: check remove
+    StatusType status = table[index]->remove(key);
     if (status != StatusType::SUCCESS)
     {
         return status;
@@ -138,8 +138,13 @@ StatusType hashTable::remove(int key)
 
     if (currSize <= maxSize / 4)
     {
-        resize(maxSize / 2);
+        StatusType statusType = resize(maxSize / 2);
+        if (statusType == StatusType::ALLOCATION_ERROR)
+        {
+            return StatusType::ALLOCATION_ERROR;
+        }
     }
+    return StatusType::SUCCESS;
 }
 
 
@@ -154,43 +159,68 @@ StatusType hashTable::resize(int newSize)
         currSize = 0;
     }
 
-    try {
-        AVL<Team *, int>** newTable = new AVL<Team *, int>* [newSize];
+    Team** TeamsArray;
+    int* keysArray;
+    AVL<Team *, int>** newTable;
 
-        for (int i = 0; i < maxSize; i++) {
-            if (table[i] == nullptr)
-            // assert (table[i]->get_size() == 0)
-            {
-                continue;
-            }
-            AVL<Team*, int> *current = table[i];
-
-            Pair pairOfKeysAndValues = current->to_array();
-
-            int *keys = pairOfKeysAndValues.left;
-            Team **values = pairOfKeysAndValues.right;
-
-            for (int j = 0; j < current->get_size(); j++)
-            {
-                Team* value = values[j];
-                int key = keys[j];
-                int index = hashFunction(key, newSize);
-                newTable[index]->insert(value, key);
-            }
-            delete pairOfKeysAndValues;
-            delete current;
-        }
-
-        delete[] table;
-        table = newTable;
-        maxSize = newSize;
-        return StatusType::SUCCESS;
+    try
+    {
+        newTable = new AVL<Team *, int> *[newSize];
     }
     catch (const std::bad_alloc& e)
     {
         return StatusType::ALLOCATION_ERROR;
     }
+
+    // iterating over the old table and inserting the elements to the new table
+    for (int i = 0; i < maxSize; i++)
+    {
+        if (table[i] == nullptr)
+            // assert (table[i]->get_size() == 0)
+            {
+                continue;
+            }
+        AVL<Team*, int> *current = table[i];
+
+        try
+        {
+            TeamsArray = new Team*[current->get_size()];
+        }
+        catch (const std::bad_alloc& e)
+        {
+            delete[] newTable;
+            return StatusType::ALLOCATION_ERROR;
+        }
+        try
+        {
+            keysArray = new int[current->get_size()];
+        }
+        catch (const std::bad_alloc& e)
+        {
+            delete[] newTable;
+            delete[] TeamsArray;
+            return StatusType::ALLOCATION_ERROR;
+        }
+        current->tree_to_sorted_array(TeamsArray, keysArray);
+
+        for (int j = 0; j < current->get_size(); j++)
+        {
+            Team* value = TeamsArray[j];
+            int key = keysArray[j];
+            int index = hashFunction(key, newSize);
+            newTable[index]->insert(value, key);
+        }
+        delete[] TeamsArray;
+        delete[] keysArray;
+        delete current;
+    }
+
+    delete[] table;
+    table = newTable;
+    maxSize = newSize;
+    return StatusType::SUCCESS;
 }
+
 
 output_t<Team*> hashTable::find(int key)
 {
