@@ -73,6 +73,7 @@ StatusType olympics_t::add_team(int teamId)
     {
         return StatusType::ALLOCATION_ERROR;
     }
+    return StatusType::SUCCESS;
 }
 
 StatusType olympics_t::remove_team(int teamId)

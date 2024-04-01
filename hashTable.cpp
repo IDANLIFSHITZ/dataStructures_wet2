@@ -7,6 +7,7 @@
 
 int hashTable::hashFunction(int key, int size)
 {
+    if (size != 0)
     return key % size;
 }
 
@@ -47,7 +48,6 @@ StatusType addAux(AVL<Team*, int>** table, int key, Team* value, int index)
 
 StatusType hashTable::add(Team* value, int key)
 {
-    int index = hashFunction(key, maxSize);
     // if the table is empty, create a new table of size 1
     if (table == nullptr)
     {
@@ -93,6 +93,7 @@ StatusType hashTable::add(Team* value, int key)
     }
 
     // the cell is empty or has a tree with a few teams in it
+    int index = hashFunction(key, maxSize);
     StatusType status = addAux(table, key, value, index);
 
     if (status != StatusType::SUCCESS)
@@ -234,8 +235,8 @@ output_t<Team*> hashTable::find(int key)
     {
         return output_t<Team*>( StatusType::FAILURE);
     }
-
-    return output_t<Team*>(table[index]->search(key));
+    Team* team = table[index]->search(key);
+    return (team != nullptr) ? output_t<Team*>(team) : output_t<Team*>(StatusType::FAILURE);
 }
 
 int hashTable::getSize() const

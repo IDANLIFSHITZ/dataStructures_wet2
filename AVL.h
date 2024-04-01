@@ -820,7 +820,7 @@ public:
      */
     valT search(keyT key) const {
         Node *nodeToFind = search_aux(this->root, key);
-        return nodeToFind != nullptr ? nodeToFind->dataZ
+        return nodeToFind != nullptr ? nodeToFind->data
                                      : nullptr; //if nodeToFind is not nullptr returns nodeToFind->data, else returns nullptr.
     }
 
@@ -1172,7 +1172,7 @@ public:
      */
     valT get_median()
     {
-        return this->search_number_of_smaller_nodes((this->numOfNodes/2) + 1);
+        return this->search_number_of_smaller_nodes((this->numOfNodes/2) + 1).ans();
     }
 
     /*

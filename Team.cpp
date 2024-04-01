@@ -168,6 +168,8 @@ StatusType Team::uniteTeams(Team* other){
 
     delete[] unitedPlayersArray;
     delete[] unitedKeysArray;
+
+    return StatusType::SUCCESS;
 }
 
 StatusType deleteArraysFromPair(const Pair<Player**, Pair<int,int>* >* pair)
@@ -177,6 +179,8 @@ StatusType deleteArraysFromPair(const Pair<Player**, Pair<int,int>* >* pair)
 
     delete[] playersArray;
     delete[] keysArray;
+
+    return StatusType::SUCCESS;
 }
 
 
