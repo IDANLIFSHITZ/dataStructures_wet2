@@ -10,6 +10,7 @@ int hashTable::hashFunction(int key, int size)
 {
     if (size != 0)
         return key % size;
+    return 0;
 }
 
 hashTable::hashTable() : maxSize(0), currSize(0), table(nullptr)
