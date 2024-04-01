@@ -141,7 +141,6 @@ StatusType hashTable::remove(int key)
     if (currSize <= maxSize / 4)
     {
         StatusType statusType = resize(maxSize / 2);
-        maxSize = maxSize / 2;
         if (statusType == StatusType::ALLOCATION_ERROR)
         {
             return StatusType::ALLOCATION_ERROR;
