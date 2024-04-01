@@ -1,3 +1,4 @@
+
 //
 // Created by yuval on 3/27/2024.
 //
@@ -8,7 +9,7 @@
 int hashTable::hashFunction(int key, int size)
 {
     if (size != 0)
-    return key % size;
+        return key % size;
 }
 
 hashTable::hashTable() : maxSize(0), currSize(0), table(nullptr)
@@ -140,6 +141,7 @@ StatusType hashTable::remove(int key)
     if (currSize <= maxSize / 4)
     {
         StatusType statusType = resize(maxSize / 2);
+        maxSize = maxSize / 2;
         if (statusType == StatusType::ALLOCATION_ERROR)
         {
             return StatusType::ALLOCATION_ERROR;
@@ -148,8 +150,6 @@ StatusType hashTable::remove(int key)
     return StatusType::SUCCESS;
 }
 
-
-// TODO: resize
 StatusType hashTable::resize(int newSize)
 {
     if (newSize == 0)
@@ -167,6 +167,10 @@ StatusType hashTable::resize(int newSize)
     try
     {
         newTable = new AVL<Team *, int> *[newSize];
+        for (int i = 0; i < newSize; i++)
+        {
+            newTable[i] = nullptr;
+        }
     }
     catch (const std::bad_alloc& e)
     {
@@ -178,10 +182,11 @@ StatusType hashTable::resize(int newSize)
     {
         if (table[i] == nullptr)
             // assert (table[i]->get_size() == 0)
-            {
-                continue;
-            }
-        AVL<Team*, int> *current = table[i];
+        {
+            delete table[i];
+            continue;
+        }
+        AVL<Team*, int>* current = table[i];
 
         try
         {
@@ -209,7 +214,11 @@ StatusType hashTable::resize(int newSize)
             Team* value = TeamsArray[j];
             int key = keysArray[j];
             int index = hashFunction(key, newSize);
-            newTable[index]->insert(value, key);
+            StatusType status = addAux(newTable, key, value, index);
+            if (status != StatusType::SUCCESS)
+            {
+                return status;
+            }
         }
         delete[] TeamsArray;
         delete[] keysArray;

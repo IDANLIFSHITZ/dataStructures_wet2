@@ -20,7 +20,7 @@ using namespace std;
 void print(ofstream&, string cmd, StatusType res);
 
 void print(ofstream&, string cmd, output_t<int> res);
-
+/*
 int main(int argc, char* argv[])
 {
     ifstream input;
@@ -126,3 +126,4 @@ void print(ofstream& out, string cmd, output_t<int> res)
     }
 }
 
+*/

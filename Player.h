@@ -65,7 +65,7 @@ public:
      * @param id the id to set
      * @return
      */
-    int setId(int id);
+    void setId(int id);
     /*
      * get the strength of the player
      * @return the strength of the player

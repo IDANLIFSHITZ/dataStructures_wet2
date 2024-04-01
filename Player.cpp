@@ -13,7 +13,7 @@ int Player::getId() const
     return id;
 }
 
-int Player::setId(int newId)
+void Player::setId(int newId)
 {
     this->id = newId;
 }
